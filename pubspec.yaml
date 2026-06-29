@@ -1,0 +1,46 @@
+name: priticious
+description: "A production-ready Flutter commerce app for dry fruits, nuts, seeds, and healthy snacks."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cached_network_image: ^3.4.1
+  carousel_slider: ^5.0.0
+  cloud_firestore: ^5.6.12
+  collection: ^1.19.1
+  cupertino_icons: ^1.0.8
+  dio: ^5.8.0+1
+  firebase_analytics: ^11.6.0
+  firebase_auth: ^5.7.0
+  firebase_core: ^3.15.2
+  firebase_messaging: ^15.2.10
+  firebase_storage: ^12.4.10
+  flutter_riverpod: ^2.6.1
+  freezed_annotation: ^3.1.0
+  go_router: ^16.0.0
+  intl: ^0.20.2
+  json_annotation: ^4.9.0
+  riverpod_annotation: ^2.6.1
+  shimmer: ^3.0.0
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  build_runner: ^2.5.4
+  custom_lint: ^0.7.6
+  freezed: ^3.1.0
+  flutter_lints: ^6.0.0
+  json_serializable: ^6.9.5
+  riverpod_generator: ^2.6.5
+  riverpod_lint: ^2.6.5
+
+flutter:
+  uses-material-design: true
