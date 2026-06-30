@@ -1,7 +1,11 @@
 {
   "hosting": {
     "public": "build/web",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
     "rewrites": [
       {
         "source": "**",
@@ -15,5 +19,34 @@
   },
   "storage": {
     "rules": "storage.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "priticious-51a56",
+          "appId": "1:628561256399:android:d1ee9be522faad6be13cba",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "priticious-51a56",
+          "appId": "1:628561256399:ios:338d37d91379e0f1e13cba",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "priticious-51a56",
+          "configurations": {
+            "android": "1:628561256399:android:d1ee9be522faad6be13cba",
+            "ios": "1:628561256399:ios:338d37d91379e0f1e13cba",
+            "web": "1:628561256399:web:57ae6c3909d7468ae13cba"
+          }
+        }
+      }
+    }
   }
 }

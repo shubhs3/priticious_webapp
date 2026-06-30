@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "628561256399",
+    "project_id": "priticious-51a56",
+    "storage_bucket": "priticious-51a56.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:628561256399:android:d1ee9be522faad6be13cba",
+        "android_client_info": {
+          "package_name": "com.priticious.priticious"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmK3Av33iji9T3SvJnMkE5pr4L2IhIlb4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
