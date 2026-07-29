@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/user_model.dart';
 import '../utils/firestore_helpers.dart';
@@ -77,5 +79,99 @@ final adminAuthServiceProvider = Provider<AdminAuthService>((ref) {
   return AdminAuthService(
     ref.watch(firebaseAuthProvider),
     ref.watch(seedServiceProvider),
+  );
+});
+
+class CustomerAuthService {
+  CustomerAuthService(this._auth, this._firestore);
+
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+
+  Future<void> signInWithEmail(String email, String password) async {
+    await _auth.signInWithEmailAndPassword(email: email, password: password);
+  }
+
+  Future<void> signUpWithEmail({
+    required String email,
+    required String password,
+    required String displayName,
+    required String phoneNumber,
+  }) async {
+    final userCredential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    final user = userCredential.user;
+    if (user != null) {
+      await _firestore.collection('users').doc(user.uid).set({
+        'id': user.uid,
+        'displayName': displayName,
+        'email': email,
+        'phoneNumber': phoneNumber,
+        'role': 'customer',
+        'isActive': true,
+        'createdAt': FieldValue.serverTimestamp(),
+        'lastLoginAt': FieldValue.serverTimestamp(),
+      });
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+    if (googleUser != null) {
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final userCredential = await _auth.signInWithCredential(credential);
+      final user = userCredential.user;
+      if (user != null) {
+        final userDoc = await _firestore.collection('users').doc(user.uid).get();
+        if (!userDoc.exists) {
+          await _firestore.collection('users').doc(user.uid).set({
+            'id': user.uid,
+            'displayName': user.displayName ?? '',
+            'email': user.email ?? '',
+            'phoneNumber': user.phoneNumber ?? '',
+            'role': 'customer',
+            'isActive': true,
+            'createdAt': FieldValue.serverTimestamp(),
+            'lastLoginAt': FieldValue.serverTimestamp(),
+          });
+        } else {
+          await _firestore.collection('users').doc(user.uid).update({
+            'lastLoginAt': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+    }
+  }
+
+  Future<void> signOut() async {
+    await _auth.signOut();
+    await GoogleSignIn().signOut();
+  }
+
+  Future<void> updateProfile({
+    required String displayName,
+    required String phoneNumber,
+  }) async {
+    final currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      await _firestore.collection('users').doc(currentUser.uid).update({
+        'displayName': displayName,
+        'phoneNumber': phoneNumber,
+      });
+    }
+  }
+}
+
+final customerAuthServiceProvider = Provider<CustomerAuthService>((ref) {
+  return CustomerAuthService(
+    ref.watch(firebaseAuthProvider),
+    ref.watch(firestoreProvider),
   );
 });

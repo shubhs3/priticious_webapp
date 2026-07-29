@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/models/address_model.dart';
 import '../../../core/models/banner_model.dart';
 import '../../../core/models/category_model.dart';
 import '../../../core/models/product_model.dart';
+import '../../../core/repositories/address_repository.dart';
 import '../../../core/repositories/catalog_repository.dart';
+import '../../../core/repositories/firestore_address_repository.dart';
 import '../../../core/repositories/firestore_catalog_repository.dart';
 import '../../../core/repositories/firestore_order_repository.dart';
 import '../../../core/repositories/order_repository.dart';
@@ -26,11 +29,24 @@ final orderRepositoryProvider = Provider<OrderRepository>((ref) {
   return SampleOrderRepository();
 });
 
+final addressRepositoryProvider = Provider<AddressRepository>((ref) {
+  if (FirebaseBootstrap.isInitialized) {
+    return FirestoreAddressRepository(ref.watch(firestoreProvider));
+  }
+  throw UnimplementedError('Address repository only works with Firebase initialized');
+});
+
 const guestCustomerId = 'guest';
 
 final currentCustomerIdProvider = Provider<String>((ref) {
   final authUser = ref.watch(firebaseAuthProvider).currentUser;
   return authUser?.uid ?? guestCustomerId;
+});
+
+final userAddressesProvider = StreamProvider<List<AddressModel>>((ref) {
+  final customerId = ref.watch(currentCustomerIdProvider);
+  if (customerId == guestCustomerId) return Stream.value(const []);
+  return ref.watch(addressRepositoryProvider).watchAddressesForUser(customerId);
 });
 
 final categoriesProvider = StreamProvider<List<CategoryModel>>(

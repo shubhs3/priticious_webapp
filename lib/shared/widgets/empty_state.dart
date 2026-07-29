@@ -6,11 +6,13 @@ class EmptyState extends StatelessWidget {
     required this.message,
     super.key,
     this.icon = Icons.inventory_2_outlined,
+    this.action,
   });
 
   final String title;
   final String message;
   final IconData icon;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,10 @@ class EmptyState extends StatelessWidget {
             Text(title, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 8),
             Text(message, textAlign: TextAlign.center),
+            if (action != null) ...[
+              const SizedBox(height: 20),
+              action!,
+            ],
           ],
         ),
       ),

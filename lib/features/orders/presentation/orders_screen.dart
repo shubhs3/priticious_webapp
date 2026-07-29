@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/models/order_model.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/responsive_page.dart';
+import '../../home/application/catalog_providers.dart';
 import '../application/order_providers.dart';
 
 class OrdersScreen extends ConsumerWidget {
@@ -13,7 +15,9 @@ class OrdersScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final customerId = ref.watch(currentCustomerIdProvider);
     final ordersAsync = ref.watch(customerOrdersProvider);
+    final isGuest = customerId == guestCustomerId;
 
     return Scaffold(
       appBar: AppBar(
@@ -21,28 +25,38 @@ class OrdersScreen extends ConsumerWidget {
       ),
       body: ResponsivePage(
         maxWidth: 720,
-        child: ordersAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => Center(child: Text('Failed to load orders: $error')),
-          data: (orders) {
-            if (orders.isEmpty) {
-              return const EmptyState(
-                title: 'No orders yet',
-                message: 'Your COD order history and tracking timeline will appear here.',
+        child: isGuest
+            ? EmptyState(
+                title: 'Sign in to view orders',
+                message: 'Your order history and live tracking details will appear once you log in.',
                 icon: Icons.receipt_long_outlined,
-              );
-            }
+                action: FilledButton(
+                  onPressed: () => context.go('/login'),
+                  child: const Text('Login / Sign Up'),
+                ),
+              )
+            : ordersAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (error, _) => Center(child: Text('Failed to load orders: $error')),
+                data: (orders) {
+                  if (orders.isEmpty) {
+                    return const EmptyState(
+                      title: 'No orders yet',
+                      message: 'Your COD order history and tracking timeline will appear here.',
+                      icon: Icons.receipt_long_outlined,
+                    );
+                  }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: orders.length,
-              itemBuilder: (context, index) {
-                final order = orders[index];
-                return _OrderCard(order: order);
-              },
-            );
-          },
-        ),
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: orders.length,
+                    itemBuilder: (context, index) {
+                      final order = orders[index];
+                      return _OrderCard(order: order);
+                    },
+                  );
+                },
+              ),
       ),
     );
   }

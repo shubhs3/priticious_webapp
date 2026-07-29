@@ -23,7 +23,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _instructionsController = TextEditingController();
+
   bool _isPlacingOrder = false;
+  bool _saveToProfile = true;
+  AddressModel? _selectedAddress;
+  bool _hasInitialAddressLoaded = false;
 
   @override
   void dispose() {
@@ -42,19 +46,25 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     try {
       final summary = ref.read(cartSummaryProvider);
       final customerId = ref.read(currentCustomerIdProvider);
+      final isLoggedIn = customerId != guestCustomerId;
       final uuid = const Uuid().v4();
 
       final address = AddressModel(
-        id: const Uuid().v4(),
+        id: _selectedAddress?.id ?? const Uuid().v4(),
         userId: customerId,
         fullName: _nameController.text.trim(),
         phoneNumber: _phoneController.text.trim(),
         line1: _addressController.text.trim(),
-        city: 'Local',
-        state: 'Local',
-        postalCode: '000000',
+        city: _selectedAddress?.city ?? 'Local',
+        state: _selectedAddress?.state ?? 'Local',
+        postalCode: _selectedAddress?.postalCode ?? '000000',
         country: 'India',
+        isDefault: _selectedAddress?.isDefault ?? false,
       );
+
+      if (_saveToProfile && isLoggedIn) {
+        await ref.read(addressRepositoryProvider).saveAddress(address);
+      }
 
       final order = OrderModel(
         id: uuid,
@@ -104,6 +114,28 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final summary = ref.watch(cartSummaryProvider);
+    final customerId = ref.watch(currentCustomerIdProvider);
+    final isLoggedIn = customerId != guestCustomerId;
+
+    ref.listen<AsyncValue<List<AddressModel>>>(userAddressesProvider, (previous, next) {
+      next.whenData((addresses) {
+        if (addresses.isNotEmpty && !_hasInitialAddressLoaded) {
+          final defaultAddr = addresses.firstWhere(
+            (addr) => addr.isDefault,
+            orElse: () => addresses.first,
+          );
+          setState(() {
+            _selectedAddress = defaultAddr;
+            _nameController.text = defaultAddr.fullName;
+            _phoneController.text = defaultAddr.phoneNumber;
+            _addressController.text = defaultAddr.line2 != null
+                ? '${defaultAddr.line1}, ${defaultAddr.line2}'
+                : defaultAddr.line1;
+            _hasInitialAddressLoaded = true;
+          });
+        }
+      });
+    });
 
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout')),
@@ -121,6 +153,51 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     ),
               ),
               const SizedBox(height: 16),
+              if (isLoggedIn)
+                ref.watch(userAddressesProvider).when(
+                  data: (addresses) {
+                    if (addresses.isEmpty) return const SizedBox.shrink();
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: DropdownButtonFormField<AddressModel>(
+                        value: _selectedAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Select Saved Address',
+                          prefixIcon: Icon(Icons.location_on),
+                          border: OutlineInputBorder(),
+                        ),
+                        items: addresses.map((addr) {
+                          return DropdownMenuItem(
+                            value: addr,
+                            child: Text(
+                              '${addr.fullName} - ${addr.line1}',
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (addr) {
+                          if (addr != null) {
+                            setState(() {
+                              _selectedAddress = addr;
+                              _nameController.text = addr.fullName;
+                              _phoneController.text = addr.phoneNumber;
+                              _addressController.text = addr.line2 != null
+                                  ? '${addr.line1}, ${addr.line2}'
+                                  : addr.line1;
+                            });
+                          }
+                        },
+                      ),
+                    );
+                  },
+                  loading: () => const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -173,6 +250,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   return null;
                 },
               ),
+              if (isLoggedIn) ...[
+                const SizedBox(height: 8),
+                CheckboxListTile(
+                  title: const Text('Save address to profile for future orders'),
+                  value: _saveToProfile,
+                  onChanged: (val) => setState(() => _saveToProfile = val ?? false),
+                ),
+              ],
               const SizedBox(height: 12),
               TextFormField(
                 controller: _instructionsController,
