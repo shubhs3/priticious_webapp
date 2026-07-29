@@ -58,6 +58,51 @@ class AdminRepository {
     });
   }
 
+  Future<void> updatePricesBulk(List<Map<String, dynamic>> updates) async {
+    for (var i = 0; i < updates.length; i += 500) {
+      final chunk = updates.sublist(
+        i,
+        i + 500 > updates.length ? updates.length : i + 500,
+      );
+      final batch = _firestore.batch();
+      for (final update in chunk) {
+        final id = update['id'] as String;
+        final docRef = _firestore.collection(FirestoreCollections.products).doc(id);
+        batch.update(docRef, {
+          'priceInPaise': update['priceInPaise'],
+          'discountPriceInPaise': update['discountPriceInPaise'],
+          'updatedAt': Timestamp.now(),
+        });
+      }
+      await batch.commit();
+    }
+  }
+
+  Future<void> insertProductsBulk(List<ProductModel> products) async {
+    final now = DateTime.now();
+    for (var i = 0; i < products.length; i += 500) {
+      final chunk = products.sublist(
+        i,
+        i + 500 > products.length ? products.length : i + 500,
+      );
+      final batch = _firestore.batch();
+      for (final product in chunk) {
+        final docRef = _firestore.collection(FirestoreCollections.products).doc(product.id);
+        final data = jsonToFirestore(
+          product
+              .copyWith(
+                updatedAt: now,
+                createdAt: product.createdAt ?? now,
+              )
+              .toJson(),
+        );
+        data.remove('id');
+        batch.set(docRef, data, SetOptions(merge: true));
+      }
+      await batch.commit();
+    }
+  }
+
   // ── Categories ──
 
   Stream<List<CategoryModel>> watchAllCategories() {

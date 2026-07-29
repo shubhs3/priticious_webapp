@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:excel/excel.dart' hide Border;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/models/product_model.dart';
+import '../../../core/utils/file_saver.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/responsive_page.dart';
@@ -21,6 +24,56 @@ class AdminProductsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Product Management'),
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            tooltip: 'Excel Import/Export',
+            onSelected: (value) => _handleExcelAction(context, ref, value),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'download_price',
+                child: Row(
+                  children: [
+                    Icon(Icons.download, size: 20),
+                    SizedBox(width: 8),
+                    Text('Download Price Template'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'upload_price',
+                child: Row(
+                  children: [
+                    Icon(Icons.upload, size: 20),
+                    SizedBox(width: 8),
+                    Text('Upload Price Updates'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'download_product',
+                child: Row(
+                  children: [
+                    Icon(Icons.download_for_offline, size: 20),
+                    SizedBox(width: 8),
+                    Text('Download Product Template'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'upload_product',
+                child: Row(
+                  children: [
+                    Icon(Icons.upload_file, size: 20),
+                    SizedBox(width: 8),
+                    Text('Upload New Products'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: ResponsivePage(
         maxWidth: 960,
@@ -145,6 +198,277 @@ class AdminProductsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  void _handleExcelAction(BuildContext context, WidgetRef ref, String action) async {
+    switch (action) {
+      case 'download_price':
+        _downloadPriceTemplate(context, ref);
+        break;
+      case 'upload_price':
+        _uploadPriceUpdates(context, ref);
+        break;
+      case 'download_product':
+        _downloadProductTemplate(context);
+        break;
+      case 'upload_product':
+        _uploadNewProducts(context, ref);
+        break;
+    }
+  }
+
+  void _downloadPriceTemplate(BuildContext context, WidgetRef ref) async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Generating Price Update template...')),
+      );
+
+      final products = await ref.read(adminProductsProvider.future);
+      
+      var excel = Excel.createExcel();
+      excel.rename('Sheet1', 'Price Updates');
+      Sheet sheetObject = excel['Price Updates'];
+      
+      sheetObject.appendRow([
+        TextCellValue('Product ID'),
+        TextCellValue('Product Name'),
+        TextCellValue('Price (Paise)'),
+        TextCellValue('Discount Price (Paise)'),
+      ]);
+
+      for (final p in products) {
+        sheetObject.appendRow([
+          TextCellValue(p.id),
+          TextCellValue(p.name),
+          IntCellValue(p.priceInPaise),
+          IntCellValue(p.discountPriceInPaise),
+        ]);
+      }
+
+      final fileBytes = excel.save();
+      if (fileBytes != null) {
+        saveFile(fileBytes, 'price_updates_${DateTime.now().millisecondsSinceEpoch}.xlsx');
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Price template downloaded!')),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to generate template: $e')),
+        );
+      }
+    }
+  }
+
+  void _downloadProductTemplate(BuildContext context) {
+    try {
+      var excel = Excel.createExcel();
+      excel.rename('Sheet1', 'New Products');
+      Sheet sheetObject = excel['New Products'];
+
+      sheetObject.appendRow([
+        TextCellValue('Name'),
+        TextCellValue('Category Slug'),
+        TextCellValue('Description'),
+        TextCellValue('Price (Paise)'),
+        TextCellValue('Discount Price (Paise)'),
+        TextCellValue('Stock'),
+        TextCellValue('Storage Instructions'),
+      ]);
+
+      // Sample row
+      sheetObject.appendRow([
+        TextCellValue('Premium California Almonds'),
+        TextCellValue('almonds'),
+        TextCellValue('High quality California almonds, raw and crunchy.'),
+        IntCellValue(39900),
+        IntCellValue(34900),
+        IntCellValue(100),
+        TextCellValue('Store in a cool, dry place.'),
+      ]);
+
+      final fileBytes = excel.save();
+      if (fileBytes != null) {
+        saveFile(fileBytes, 'new_products_template.xlsx');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Product template downloaded!')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to generate template: $e')),
+      );
+    }
+  }
+
+  void _uploadPriceUpdates(BuildContext context, WidgetRef ref) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['xlsx'],
+      );
+
+      if (result == null || result.files.single.bytes == null) {
+        return;
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Parsing file and updating prices...')),
+        );
+      }
+
+      final bytes = result.files.single.bytes!;
+      final excel = Excel.decodeBytes(bytes);
+      final updates = <Map<String, dynamic>>[];
+
+      for (final table in excel.tables.keys) {
+        final sheet = excel.tables[table];
+        if (sheet == null) continue;
+
+        for (int i = 1; i < sheet.maxRows; i++) {
+          final row = sheet.rows[i];
+          if (row.isEmpty || row[0] == null) continue;
+
+          final id = row[0]?.value?.toString().trim();
+          if (id == null || id.isEmpty) continue;
+
+          final priceVal = row[2]?.value;
+          final discountVal = row[3]?.value;
+
+          final price = int.tryParse(priceVal?.toString() ?? '') ?? 0;
+          final discount = int.tryParse(discountVal?.toString() ?? '') ?? 0;
+
+          if (price > 0 && discount > 0) {
+            updates.add({
+              'id': id,
+              'priceInPaise': price,
+              'discountPriceInPaise': discount,
+            });
+          }
+        }
+      }
+
+      if (updates.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No valid price updates found in file.')),
+          );
+        }
+        return;
+      }
+
+      await ref.read(adminRepositoryProvider).updatePricesBulk(updates);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Successfully updated ${updates.length} product prices!')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update prices: $e')),
+        );
+      }
+    }
+  }
+
+  void _uploadNewProducts(BuildContext context, WidgetRef ref) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['xlsx'],
+      );
+
+      if (result == null || result.files.single.bytes == null) {
+        return;
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Parsing file and importing products...')),
+        );
+      }
+
+      final bytes = result.files.single.bytes!;
+      final excel = Excel.decodeBytes(bytes);
+      final newProducts = <ProductModel>[];
+
+      for (final table in excel.tables.keys) {
+        final sheet = excel.tables[table];
+        if (sheet == null) continue;
+
+        for (int i = 1; i < sheet.maxRows; i++) {
+          final row = sheet.rows[i];
+          if (row.isEmpty || row[0] == null) continue;
+
+          final name = row[0]?.value?.toString().trim() ?? '';
+          final categoryId = row[1]?.value?.toString().trim() ?? '';
+          final description = row[2]?.value?.toString().trim() ?? '';
+          
+          if (name.isEmpty || categoryId.isEmpty) continue;
+
+          final priceVal = row[3]?.value;
+          final discountVal = row[4]?.value;
+          final stockVal = row[5]?.value;
+          final storage = row[6]?.value?.toString().trim() ?? 'Cool and dry place.';
+
+          final price = int.tryParse(priceVal?.toString() ?? '') ?? 34900;
+          final discount = int.tryParse(discountVal?.toString() ?? '') ?? 29900;
+          final stock = int.tryParse(stockVal?.toString() ?? '') ?? 100;
+
+          final id = const Uuid().v4();
+          
+          newProducts.add(
+            ProductModel(
+              id: id,
+              categoryId: categoryId,
+              name: name,
+              description: description,
+              imageUrls: const [],
+              priceInPaise: price,
+              discountPriceInPaise: discount,
+              weightOptions: const [
+                ProductWeightOption(label: '250 g', grams: 250, priceInPaise: 39900, discountPriceInPaise: 34900),
+                ProductWeightOption(label: '500 g', grams: 500, priceInPaise: 74900, discountPriceInPaise: 64900),
+              ],
+              stock: stock,
+              nutrition: const {'Energy': '500 kcal'},
+              ingredients: const ['Pure ingredients'],
+              storageInstructions: storage,
+              isActive: true,
+            ),
+          );
+        }
+      }
+
+      if (newProducts.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No valid products found in file.')),
+          );
+        }
+        return;
+      }
+
+      await ref.read(adminRepositoryProvider).insertProductsBulk(newProducts);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Successfully imported ${newProducts.length} new products!')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to import products: $e')),
+        );
+      }
+    }
   }
 }
 

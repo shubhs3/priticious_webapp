@@ -24,13 +24,6 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Priticious'),
-        actions: [
-          IconButton(
-            tooltip: 'Admin panel',
-            onPressed: () => context.go('/admin'),
-            icon: const Icon(Icons.admin_panel_settings_outlined),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: ResponsivePage(
