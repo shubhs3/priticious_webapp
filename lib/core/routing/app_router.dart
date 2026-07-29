@@ -14,6 +14,14 @@ import '../../features/products/presentation/product_listing_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
 
+import '../../features/admin/presentation/admin_products_screen.dart';
+import '../../features/admin/presentation/admin_categories_screen.dart';
+import '../../features/admin/presentation/admin_banners_screen.dart';
+import '../../features/admin/presentation/admin_orders_screen.dart';
+import '../../features/admin/presentation/admin_sales_screen.dart';
+import '../../features/admin/presentation/admin_customers_screen.dart';
+import '../../features/admin/presentation/admin_notifications_screen.dart';
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/splash',
@@ -63,6 +71,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/admin',
         builder: (context, state) => const AdminDashboardScreen(),
+        routes: [
+          GoRoute(
+            path: 'products',
+            builder: (context, state) => const AdminProductsScreen(),
+          ),
+          GoRoute(
+            path: 'categories',
+            builder: (context, state) => const AdminCategoriesScreen(),
+          ),
+          GoRoute(
+            path: 'banners',
+            builder: (context, state) => const AdminBannersScreen(),
+          ),
+          GoRoute(
+            path: 'inventory',
+            builder: (context, state) => const AdminProductsScreen(), // share products screen for inventory
+          ),
+          GoRoute(
+            path: 'orders',
+            builder: (context, state) => const AdminOrdersScreen(),
+          ),
+          GoRoute(
+            path: 'customers',
+            builder: (context, state) => const AdminCustomersScreen(),
+          ),
+          GoRoute(
+            path: 'notifications',
+            builder: (context, state) => const AdminNotificationsScreen(),
+          ),
+          GoRoute(
+            path: 'sales',
+            builder: (context, state) => const AdminSalesScreen(),
+          ),
+        ],
       ),
     ],
   );

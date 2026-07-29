@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -85,6 +87,8 @@ class _ProductImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final hasImage = product.imageUrls.isNotEmpty;
+
     return AspectRatio(
       aspectRatio: 1,
       child: Container(
@@ -92,11 +96,37 @@ class _ProductImage extends StatelessWidget {
           color: colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(
-          Icons.spa_outlined,
-          size: 96,
-          color: colorScheme.onPrimaryContainer,
-        ),
+        child: hasImage
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: product.imageUrls.first.startsWith('data:image/')
+                    ? Image.memory(
+                        base64Decode(product.imageUrls.first.split(';base64,').last),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          Icons.broken_image,
+                          size: 48,
+                          color: colorScheme.onPrimaryContainer,
+                        ),
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: product.imageUrls.first,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        errorWidget: (context, url, error) => Icon(
+                          Icons.broken_image,
+                          size: 48,
+                          color: colorScheme.onPrimaryContainer,
+                        ),
+                      ),
+              )
+            : Icon(
+                Icons.spa_outlined,
+                size: 96,
+                color: colorScheme.onPrimaryContainer,
+              ),
       ),
     );
   }
