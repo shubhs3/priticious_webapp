@@ -36,10 +36,12 @@ class ProfileScreen extends ConsumerWidget {
             const ListTile(
               leading: Icon(Icons.support_agent),
               title: Text('Contact Us'),
+              subtitle: Text('For Order Contact no. 9999909122'),
             ),
             const ListTile(
               leading: Icon(Icons.info_outline),
               title: Text('About'),
+              subtitle: Text('DEALS IN PREMIUM DRY FRUITS'),
             ),
             const ListTile(
               leading: Icon(Icons.privacy_tip_outlined),

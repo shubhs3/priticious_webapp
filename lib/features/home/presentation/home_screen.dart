@@ -23,7 +23,7 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Priticious'),
+        title: const Text('PRITICIOUS DRY FRUITS'),
       ),
       body: SingleChildScrollView(
         child: ResponsivePage(

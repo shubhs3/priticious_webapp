@@ -14,7 +14,7 @@ class PriticiousApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
-      title: 'Priticious',
+      title: 'PRITICIOUS DRY FRUITS',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

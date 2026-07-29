@@ -169,8 +169,6 @@ class AdminDashboardScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(16),
               children: const [
                 AdminLoginPanel(),
-                SizedBox(height: 16),
-                AdminSeedPanel(),
               ],
             );
           }
@@ -178,8 +176,6 @@ class AdminDashboardScreen extends ConsumerWidget {
           return ResponsivePage(
             child: ListView(
               children: [
-                const AdminSeedPanel(),
-                const SizedBox(height: 24),
                 Text(
                   'Modules',
                   style: Theme.of(context).textTheme.titleLarge,

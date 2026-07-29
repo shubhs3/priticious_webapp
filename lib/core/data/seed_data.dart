@@ -151,6 +151,6 @@ const sampleSettings = <String, dynamic>{
   'deliveryChargeInPaise': 4900,
   'freeDeliveryThresholdInPaise': 99900,
   'supportEmail': 'support@priticious.com',
-  'supportPhone': '+91 9876543210',
-  'storeName': 'Priticious',
+  'supportPhone': '9999909122',
+  'storeName': 'PRITICIOUS DRY FRUITS',
 };
