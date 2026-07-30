@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/app_constants.dart';
+import '../../../core/models/cart_model.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/responsive_page.dart';
@@ -37,24 +39,39 @@ class CartScreen extends ConsumerWidget {
                           ),
                           title: Text(item.name),
                           subtitle: Text(
-                            '${item.weightOption.label} • ${MoneyFormatter.formatPaise(item.unitPriceInPaise)}',
+                            '${item.weightOption.label} • ${MoneyFormatter.formatPaise(item.unitPriceInPaise)} x ${item.quantity} = ${MoneyFormatter.formatPaise(item.unitPriceInPaise * item.quantity)}',
                           ),
-                          trailing: SegmentedButton<int>(
-                            segments: const [
-                              ButtonSegment(
-                                value: -1,
-                                icon: Icon(Icons.remove),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton.filledTonal(
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () {
+                                  ref
+                                      .read(cartControllerProvider.notifier)
+                                      .updateQuantity(item, item.quantity - 1);
+                                },
+                                icon: const Icon(Icons.remove, size: 16),
                               ),
-                              ButtonSegment(value: 1, icon: Icon(Icons.add)),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                child: Text(
+                                  '${item.quantity}',
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ),
+                              IconButton.filled(
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () {
+                                  ref
+                                      .read(cartControllerProvider.notifier)
+                                      .updateQuantity(item, item.quantity + 1);
+                                },
+                                icon: const Icon(Icons.add, size: 16),
+                              ),
                             ],
-                            selected: const {},
-                            emptySelectionAllowed: true,
-                            onSelectionChanged: (selection) {
-                              final delta = selection.firstOrNull ?? 0;
-                              ref
-                                  .read(cartControllerProvider.notifier)
-                                  .updateQuantity(item, item.quantity + delta);
-                            },
                           ),
                         );
                       },
@@ -79,18 +96,52 @@ class CartScreen extends ConsumerWidget {
 class _PriceBreakdown extends StatelessWidget {
   const _PriceBreakdown({required this.summary});
 
-  final dynamic summary;
+  final CartSummaryModel summary;
 
   @override
   Widget build(BuildContext context) {
+    final totalItems = summary.items.fold<int>(0, (sum, i) => sum + i.quantity);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _row('Subtotal', summary.subtotalInPaise),
+            _row('Subtotal ($totalItems items)', summary.subtotalInPaise),
             _row('Delivery', summary.deliveryChargeInPaise),
-            const Divider(),
+            if (AppConstants.enableDeliveryCharges) ...[
+              if (summary.subtotalInPaise < AppConstants.freeDeliveryThresholdInPaise && summary.subtotalInPaise > 0) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Add ${MoneyFormatter.formatPaise(AppConstants.freeDeliveryThresholdInPaise - summary.subtotalInPaise)} more for FREE delivery!',
+                  style: TextStyle(
+                    color: Colors.orange[800],
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ] else if (summary.subtotalInPaise >= AppConstants.freeDeliveryThresholdInPaise) ...[
+                const SizedBox(height: 8),
+                const Text(
+                  '🎉 You qualify for FREE delivery!',
+                  style: TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ] else if (summary.subtotalInPaise > 0) ...[
+              const SizedBox(height: 8),
+              const Text(
+                '🎉 Free delivery on all orders!',
+                style: TextStyle(
+                  color: Colors.green,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+            const Divider(height: 24),
             _row('Total', summary.totalInPaise, bold: true),
           ],
         ),
@@ -114,8 +165,4 @@ class _PriceBreakdown extends StatelessWidget {
       ),
     );
   }
-}
-
-extension _FirstOrNull<T> on Set<T> {
-  T? get firstOrNull => isEmpty ? null : first;
 }

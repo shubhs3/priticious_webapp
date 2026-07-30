@@ -2,20 +2,30 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/models/product_model.dart';
 import '../../core/utils/money_formatter.dart';
+import '../../features/cart/application/cart_controller.dart';
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends ConsumerWidget {
   const ProductCard({required this.product, super.key, this.onAdd});
 
   final ProductModel product;
   final VoidCallback? onAdd;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final hasImage = product.imageUrls.isNotEmpty;
+
+    final defaultWeight = product.weightOptions.first;
+    final cartItems = ref.watch(cartControllerProvider);
+    final cartItemIndex = cartItems.indexWhere(
+      (item) => item.productId == product.id && item.weightOption == defaultWeight,
+    );
+    final inCart = cartItemIndex != -1;
+    final quantity = inCart ? cartItems[cartItemIndex].quantity : 0;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -137,15 +147,57 @@ class ProductCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      IconButton.filled(
-                        visualDensity: VisualDensity.compact,
-                        style: IconButton.styleFrom(
-                          backgroundColor: colorScheme.primary,
-                          foregroundColor: colorScheme.onPrimary,
+                      if (inCart)
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton.filledTonal(
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () {
+                                final cartItem = cartItems[cartItemIndex];
+                                ref
+                                    .read(cartControllerProvider.notifier)
+                                    .updateQuantity(cartItem, cartItem.quantity - 1);
+                              },
+                              icon: const Icon(Icons.remove, size: 16),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 6),
+                              child: Text(
+                                '$quantity',
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            ),
+                            IconButton.filled(
+                              visualDensity: VisualDensity.compact,
+                              onPressed: () {
+                                ref
+                                    .read(cartControllerProvider.notifier)
+                                    .addProduct(product, defaultWeight);
+                              },
+                              icon: const Icon(Icons.add, size: 16),
+                            ),
+                          ],
+                        )
+                      else
+                        IconButton.filled(
+                          visualDensity: VisualDensity.compact,
+                          style: IconButton.styleFrom(
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
+                          ),
+                          onPressed: () {
+                            ref
+                                .read(cartControllerProvider.notifier)
+                                .addProduct(product, defaultWeight);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('${product.name} added to cart')),
+                            );
+                          },
+                          icon: const Icon(Icons.add_shopping_cart, size: 18),
                         ),
-                        onPressed: onAdd,
-                        icon: const Icon(Icons.add_shopping_cart, size: 18),
-                      ),
                     ],
                   ),
                 ],

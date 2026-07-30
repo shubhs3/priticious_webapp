@@ -6,4 +6,8 @@ class AppConstants {
   static const currencySymbol = '₹';
   static const freeDeliveryThresholdInPaise = 99900;
   static const standardDeliveryChargeInPaise = 4900;
+  
+  /// Whether to charge a delivery fee below the free delivery threshold.
+  /// Set to `false` to make all deliveries free.
+  static const enableDeliveryCharges = false;
 }

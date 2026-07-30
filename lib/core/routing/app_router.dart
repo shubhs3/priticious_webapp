@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../services/notification_service.dart';
+import '../../features/home/application/catalog_providers.dart';
+
 import '../../features/admin/presentation/admin_dashboard_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
@@ -110,13 +113,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-class CustomerShell extends StatelessWidget {
+class CustomerShell extends ConsumerWidget {
   const CustomerShell({required this.child, super.key});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final customerId = ref.watch(currentCustomerIdProvider);
+    if (customerId != guestCustomerId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(notificationServiceProvider).initNotifications(customerId, context);
+      });
+    }
+
     final location = GoRouterState.of(context).uri.path;
     return Scaffold(
       body: child,

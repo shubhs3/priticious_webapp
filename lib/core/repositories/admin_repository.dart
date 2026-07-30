@@ -177,6 +177,21 @@ class AdminRepository {
         );
   }
 
+  Stream<List<OrderModel>> watchOrdersForCustomer(String customerId) {
+    return _firestore
+        .collection(FirestoreCollections.orders)
+        .where('customerId', isEqualTo: customerId)
+        .orderBy('placedAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => OrderModel.fromJson(docDataWithId(doc)),
+              )
+              .toList(),
+        );
+  }
+
   Future<void> updateOrderStatus(String orderId, OrderStatus status) async {
     await _firestore.collection(FirestoreCollections.orders).doc(orderId).update({
       'status': status.name,

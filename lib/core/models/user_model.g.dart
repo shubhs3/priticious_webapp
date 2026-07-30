@@ -20,6 +20,7 @@ _UserModel _$UserModelFromJson(Map<String, dynamic> json) => _UserModel(
   lastLoginAt: json['lastLoginAt'] == null
       ? null
       : DateTime.parse(json['lastLoginAt'] as String),
+  fcmToken: json['fcmToken'] as String?,
 );
 
 Map<String, dynamic> _$UserModelToJson(_UserModel instance) =>
@@ -32,6 +33,7 @@ Map<String, dynamic> _$UserModelToJson(_UserModel instance) =>
       'isActive': instance.isActive,
       'createdAt': instance.createdAt?.toIso8601String(),
       'lastLoginAt': instance.lastLoginAt?.toIso8601String(),
+      'fcmToken': instance.fcmToken,
     };
 
 const _$UserRoleEnumMap = {

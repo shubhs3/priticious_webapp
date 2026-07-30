@@ -145,6 +145,13 @@ class _Details extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cartItems = ref.watch(cartControllerProvider);
+    final cartItemIndex = cartItems.indexWhere(
+      (item) => item.productId == product.id && item.weightOption == weight,
+    );
+    final inCart = cartItemIndex != -1;
+    final quantity = inCart ? cartItems[cartItemIndex].quantity : 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -174,18 +181,72 @@ class _Details extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 18),
-        FilledButton.icon(
-          onPressed: () {
-            ref
-                .read(cartControllerProvider.notifier)
-                .addProduct(product, weight);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${product.name} added to cart')),
-            );
-          },
-          icon: const Icon(Icons.add_shopping_cart),
-          label: const Text('Add to Cart'),
-        ),
+        if (inCart)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              OutlinedButton(
+                onPressed: () {
+                  final cartItem = cartItems[cartItemIndex];
+                  ref
+                      .read(cartControllerProvider.notifier)
+                      .updateQuantity(cartItem, cartItem.quantity - 1);
+                },
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Icon(Icons.remove),
+              ),
+              Container(
+                constraints: const BoxConstraints(minWidth: 48),
+                height: 48,
+                alignment: Alignment.center,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$quantity',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              FilledButton(
+                onPressed: () {
+                  ref
+                      .read(cartControllerProvider.notifier)
+                      .addProduct(product, weight);
+                },
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(48, 48),
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Icon(Icons.add),
+              ),
+            ],
+          )
+        else
+          FilledButton.icon(
+            onPressed: () {
+              ref
+                  .read(cartControllerProvider.notifier)
+                  .addProduct(product, weight);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('${product.name} added to cart')),
+              );
+            },
+            icon: const Icon(Icons.add_shopping_cart),
+            label: const Text('Add to Cart'),
+          ),
         const SizedBox(height: 24),
         Text('Nutrition', style: Theme.of(context).textTheme.titleLarge),
         DataTable(

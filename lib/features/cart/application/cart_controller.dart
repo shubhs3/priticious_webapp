@@ -16,7 +16,9 @@ final cartSummaryProvider = Provider<CartSummaryModel>((ref) {
     (total, item) => total + item.unitPriceInPaise * item.quantity,
   );
   final delivery =
-      subtotal >= AppConstants.freeDeliveryThresholdInPaise || subtotal == 0
+      !AppConstants.enableDeliveryCharges ||
+      subtotal >= AppConstants.freeDeliveryThresholdInPaise ||
+      subtotal == 0
       ? 0
       : AppConstants.standardDeliveryChargeInPaise;
 

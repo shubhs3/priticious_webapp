@@ -16,6 +16,7 @@ abstract class UserModel with _$UserModel {
     @Default(true) bool isActive,
     DateTime? createdAt,
     DateTime? lastLoginAt,
+    String? fcmToken,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
