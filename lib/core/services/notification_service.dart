@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../constants/app_constants.dart';
 import 'firebase_providers.dart';
 
 class NotificationService {
@@ -25,7 +26,7 @@ class NotificationService {
       );
 
       if (settings.authorizationStatus != AuthorizationStatus.denied) {
-        final token = await _messaging.getToken();
+        final token = await _messaging.getToken(vapidKey: AppConstants.vapidKey);
         if (token != null) {
           debugPrint("FCM Registration Token: $token");
           // Save token to user document
