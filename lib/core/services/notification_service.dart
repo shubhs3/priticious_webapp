@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -11,51 +13,61 @@ class NotificationService {
 
   final FirebaseMessaging _messaging;
   final FirebaseFirestore _firestore;
-  bool _initialized = false;
+  
+  BuildContext? _context;
+  String? _currentUserId;
+  StreamSubscription? _firestoreSubscription;
+  bool _fcmInitialized = false;
 
   Future<void> initNotifications(String userId, BuildContext context) async {
-    if (_initialized) return;
-    _initialized = true;
+    _context = context;
+    if (_currentUserId == userId) return;
+    _currentUserId = userId;
 
     // 1. Request Permission and FCM Token
-    try {
-      final settings = await _messaging.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
+    if (!_fcmInitialized) {
+      _fcmInitialized = true;
+      try {
+        final settings = await _messaging.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
 
-      if (settings.authorizationStatus != AuthorizationStatus.denied) {
-        final token = await _messaging.getToken(vapidKey: AppConstants.vapidKey);
-        if (token != null) {
-          debugPrint("FCM Registration Token: $token");
-          // Save token to user document
-          await _firestore.collection('users').doc(userId).update({
-            'fcmToken': token,
-            'lastLoginAt': FieldValue.serverTimestamp(),
-          });
+        if (settings.authorizationStatus != AuthorizationStatus.denied) {
+          final token = await _messaging.getToken(vapidKey: AppConstants.vapidKey);
+          if (token != null) {
+            debugPrint("FCM Registration Token: $token");
+            // Save token to user document
+            await _firestore.collection('users').doc(userId).update({
+              'fcmToken': token,
+              'lastLoginAt': FieldValue.serverTimestamp(),
+            });
+          }
         }
+      } catch (e) {
+        debugPrint("FCM initialization failed: $e");
       }
-    } catch (e) {
-      debugPrint("FCM initialization failed: $e");
+
+      // 2. Setup Foreground Messaging listener
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        if (message.notification != null) {
+          final activeContext = _context;
+          if (activeContext != null && activeContext.mounted) {
+            _showForegroundDialog(
+              activeContext,
+              message.notification!.title ?? "Priticious Notification",
+              message.notification!.body ?? "",
+            );
+          }
+        }
+      });
     }
 
-    // 2. Setup Foreground Messaging listener
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      if (message.notification != null) {
-        if (context.mounted) {
-          _showForegroundDialog(
-            context,
-            message.notification!.title ?? "Priticious Notification",
-            message.notification!.body ?? "",
-          );
-        }
-      }
-    });
-
     // 3. Setup Firestore Real-Time Targeted Notifications Listener
+    await _firestoreSubscription?.cancel();
     final launchTime = DateTime.now();
-    _firestore
+    _firestoreSubscription = _firestore
         .collection('notifications')
         .where('userId', whereIn: ['all', userId])
         .where('createdAt', isGreaterThan: Timestamp.fromDate(launchTime))
@@ -67,8 +79,9 @@ class NotificationService {
               if (data != null) {
                 final title = data['title'] as String? ?? 'Notification';
                 final body = data['body'] as String? ?? '';
-                if (context.mounted) {
-                  _showForegroundDialog(context, title, body);
+                final activeContext = _context;
+                if (activeContext != null && activeContext.mounted) {
+                  _showForegroundDialog(activeContext, title, body);
                 }
               }
             }
