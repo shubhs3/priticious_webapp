@@ -9,5 +9,5 @@ class MoneyFormatter {
     decimalDigits: 0,
   );
 
-  static String formatPaise(int paise) => _formatter.format(paise / 100);
+  static String format(double amount) => _formatter.format(amount);
 }

@@ -69,8 +69,8 @@ class AdminRepository {
         final id = update['id'] as String;
         final docRef = _firestore.collection(FirestoreCollections.products).doc(id);
         batch.update(docRef, {
-          'priceInPaise': update['priceInPaise'],
-          'discountPriceInPaise': update['discountPriceInPaise'],
+          'price': update['price'],
+          'discountPrice': update['discountPrice'],
           'updatedAt': Timestamp.now(),
         });
       }
@@ -271,14 +271,14 @@ class AdminRepository {
         .collection(FirestoreCollections.products)
         .get();
 
-    var totalRevenue = 0;
+    var totalRevenue = 0.0;
     var pendingOrders = 0;
     var deliveredOrders = 0;
 
     for (final doc in ordersSnapshot.docs) {
       final data = doc.data();
       final status = data['status'] as String? ?? 'pending';
-      final total = (data['totalInPaise'] as num?)?.toInt() ?? 0;
+      final total = (data['total'] as num?)?.toDouble() ?? 0.0;
       if (status == 'delivered') {
         deliveredOrders++;
         totalRevenue += total;
@@ -297,7 +297,7 @@ class AdminRepository {
       'totalOrders': ordersSnapshot.docs.length,
       'pendingOrders': pendingOrders,
       'deliveredOrders': deliveredOrders,
-      'totalRevenueInPaise': totalRevenue,
+      'totalRevenue': totalRevenue,
       'productCount': productsSnapshot.docs.length,
       'lowStockCount': lowStockCount,
     };

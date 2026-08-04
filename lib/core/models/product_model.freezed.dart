@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProductModel {
 
- String get id; String get categoryId; String get name; String get description; List<String> get imageUrls; int get priceInPaise; int get discountPriceInPaise; List<ProductWeightOption> get weightOptions; int get stock; Map<String, String> get nutrition; List<String> get ingredients; String get storageInstructions; bool get isFeatured; bool get isBestSeller; bool get isNewArrival; bool get isRecentlyAdded; bool get isActive; DateTime? get createdAt; DateTime? get updatedAt;
+ String get id; String get categoryId; String get name; String get description; List<String> get imageUrls; double get price; double get discountPrice; List<ProductWeightOption> get weightOptions; int get stock; Map<String, String> get nutrition; List<String> get ingredients; String get storageInstructions; bool get isFeatured; bool get isBestSeller; bool get isNewArrival; bool get isRecentlyAdded; bool get isActive; DateTime? get createdAt; DateTime? get updatedAt;
 /// Create a copy of ProductModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ProductModelCopyWith<ProductModel> get copyWith => _$ProductModelCopyWithImpl<P
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductModel&&(identical(other.id, id) || other.id == id)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other.imageUrls, imageUrls)&&(identical(other.priceInPaise, priceInPaise) || other.priceInPaise == priceInPaise)&&(identical(other.discountPriceInPaise, discountPriceInPaise) || other.discountPriceInPaise == discountPriceInPaise)&&const DeepCollectionEquality().equals(other.weightOptions, weightOptions)&&(identical(other.stock, stock) || other.stock == stock)&&const DeepCollectionEquality().equals(other.nutrition, nutrition)&&const DeepCollectionEquality().equals(other.ingredients, ingredients)&&(identical(other.storageInstructions, storageInstructions) || other.storageInstructions == storageInstructions)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.isBestSeller, isBestSeller) || other.isBestSeller == isBestSeller)&&(identical(other.isNewArrival, isNewArrival) || other.isNewArrival == isNewArrival)&&(identical(other.isRecentlyAdded, isRecentlyAdded) || other.isRecentlyAdded == isRecentlyAdded)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductModel&&(identical(other.id, id) || other.id == id)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other.imageUrls, imageUrls)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice)&&const DeepCollectionEquality().equals(other.weightOptions, weightOptions)&&(identical(other.stock, stock) || other.stock == stock)&&const DeepCollectionEquality().equals(other.nutrition, nutrition)&&const DeepCollectionEquality().equals(other.ingredients, ingredients)&&(identical(other.storageInstructions, storageInstructions) || other.storageInstructions == storageInstructions)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.isBestSeller, isBestSeller) || other.isBestSeller == isBestSeller)&&(identical(other.isNewArrival, isNewArrival) || other.isNewArrival == isNewArrival)&&(identical(other.isRecentlyAdded, isRecentlyAdded) || other.isRecentlyAdded == isRecentlyAdded)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,categoryId,name,description,const DeepCollectionEquality().hash(imageUrls),priceInPaise,discountPriceInPaise,const DeepCollectionEquality().hash(weightOptions),stock,const DeepCollectionEquality().hash(nutrition),const DeepCollectionEquality().hash(ingredients),storageInstructions,isFeatured,isBestSeller,isNewArrival,isRecentlyAdded,isActive,createdAt,updatedAt]);
+int get hashCode => Object.hashAll([runtimeType,id,categoryId,name,description,const DeepCollectionEquality().hash(imageUrls),price,discountPrice,const DeepCollectionEquality().hash(weightOptions),stock,const DeepCollectionEquality().hash(nutrition),const DeepCollectionEquality().hash(ingredients),storageInstructions,isFeatured,isBestSeller,isNewArrival,isRecentlyAdded,isActive,createdAt,updatedAt]);
 
 @override
 String toString() {
-  return 'ProductModel(id: $id, categoryId: $categoryId, name: $name, description: $description, imageUrls: $imageUrls, priceInPaise: $priceInPaise, discountPriceInPaise: $discountPriceInPaise, weightOptions: $weightOptions, stock: $stock, nutrition: $nutrition, ingredients: $ingredients, storageInstructions: $storageInstructions, isFeatured: $isFeatured, isBestSeller: $isBestSeller, isNewArrival: $isNewArrival, isRecentlyAdded: $isRecentlyAdded, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'ProductModel(id: $id, categoryId: $categoryId, name: $name, description: $description, imageUrls: $imageUrls, price: $price, discountPrice: $discountPrice, weightOptions: $weightOptions, stock: $stock, nutrition: $nutrition, ingredients: $ingredients, storageInstructions: $storageInstructions, isFeatured: $isFeatured, isBestSeller: $isBestSeller, isNewArrival: $isNewArrival, isRecentlyAdded: $isRecentlyAdded, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ProductModelCopyWith<$Res>  {
   factory $ProductModelCopyWith(ProductModel value, $Res Function(ProductModel) _then) = _$ProductModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String categoryId, String name, String description, List<String> imageUrls, int priceInPaise, int discountPriceInPaise, List<ProductWeightOption> weightOptions, int stock, Map<String, String> nutrition, List<String> ingredients, String storageInstructions, bool isFeatured, bool isBestSeller, bool isNewArrival, bool isRecentlyAdded, bool isActive, DateTime? createdAt, DateTime? updatedAt
+ String id, String categoryId, String name, String description, List<String> imageUrls, double price, double discountPrice, List<ProductWeightOption> weightOptions, int stock, Map<String, String> nutrition, List<String> ingredients, String storageInstructions, bool isFeatured, bool isBestSeller, bool isNewArrival, bool isRecentlyAdded, bool isActive, DateTime? createdAt, DateTime? updatedAt
 });
 
 
@@ -65,16 +65,16 @@ class _$ProductModelCopyWithImpl<$Res>
 
 /// Create a copy of ProductModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? categoryId = null,Object? name = null,Object? description = null,Object? imageUrls = null,Object? priceInPaise = null,Object? discountPriceInPaise = null,Object? weightOptions = null,Object? stock = null,Object? nutrition = null,Object? ingredients = null,Object? storageInstructions = null,Object? isFeatured = null,Object? isBestSeller = null,Object? isNewArrival = null,Object? isRecentlyAdded = null,Object? isActive = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? categoryId = null,Object? name = null,Object? description = null,Object? imageUrls = null,Object? price = null,Object? discountPrice = null,Object? weightOptions = null,Object? stock = null,Object? nutrition = null,Object? ingredients = null,Object? storageInstructions = null,Object? isFeatured = null,Object? isBestSeller = null,Object? isNewArrival = null,Object? isRecentlyAdded = null,Object? isActive = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,imageUrls: null == imageUrls ? _self.imageUrls : imageUrls // ignore: cast_nullable_to_non_nullable
-as List<String>,priceInPaise: null == priceInPaise ? _self.priceInPaise : priceInPaise // ignore: cast_nullable_to_non_nullable
-as int,discountPriceInPaise: null == discountPriceInPaise ? _self.discountPriceInPaise : discountPriceInPaise // ignore: cast_nullable_to_non_nullable
-as int,weightOptions: null == weightOptions ? _self.weightOptions : weightOptions // ignore: cast_nullable_to_non_nullable
+as List<String>,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
+as double,discountPrice: null == discountPrice ? _self.discountPrice : discountPrice // ignore: cast_nullable_to_non_nullable
+as double,weightOptions: null == weightOptions ? _self.weightOptions : weightOptions // ignore: cast_nullable_to_non_nullable
 as List<ProductWeightOption>,stock: null == stock ? _self.stock : stock // ignore: cast_nullable_to_non_nullable
 as int,nutrition: null == nutrition ? _self.nutrition : nutrition // ignore: cast_nullable_to_non_nullable
 as Map<String, String>,ingredients: null == ingredients ? _self.ingredients : ingredients // ignore: cast_nullable_to_non_nullable
@@ -171,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String categoryId,  String name,  String description,  List<String> imageUrls,  int priceInPaise,  int discountPriceInPaise,  List<ProductWeightOption> weightOptions,  int stock,  Map<String, String> nutrition,  List<String> ingredients,  String storageInstructions,  bool isFeatured,  bool isBestSeller,  bool isNewArrival,  bool isRecentlyAdded,  bool isActive,  DateTime? createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String categoryId,  String name,  String description,  List<String> imageUrls,  double price,  double discountPrice,  List<ProductWeightOption> weightOptions,  int stock,  Map<String, String> nutrition,  List<String> ingredients,  String storageInstructions,  bool isFeatured,  bool isBestSeller,  bool isNewArrival,  bool isRecentlyAdded,  bool isActive,  DateTime? createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProductModel() when $default != null:
-return $default(_that.id,_that.categoryId,_that.name,_that.description,_that.imageUrls,_that.priceInPaise,_that.discountPriceInPaise,_that.weightOptions,_that.stock,_that.nutrition,_that.ingredients,_that.storageInstructions,_that.isFeatured,_that.isBestSeller,_that.isNewArrival,_that.isRecentlyAdded,_that.isActive,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.categoryId,_that.name,_that.description,_that.imageUrls,_that.price,_that.discountPrice,_that.weightOptions,_that.stock,_that.nutrition,_that.ingredients,_that.storageInstructions,_that.isFeatured,_that.isBestSeller,_that.isNewArrival,_that.isRecentlyAdded,_that.isActive,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -192,10 +192,10 @@ return $default(_that.id,_that.categoryId,_that.name,_that.description,_that.ima
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String categoryId,  String name,  String description,  List<String> imageUrls,  int priceInPaise,  int discountPriceInPaise,  List<ProductWeightOption> weightOptions,  int stock,  Map<String, String> nutrition,  List<String> ingredients,  String storageInstructions,  bool isFeatured,  bool isBestSeller,  bool isNewArrival,  bool isRecentlyAdded,  bool isActive,  DateTime? createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String categoryId,  String name,  String description,  List<String> imageUrls,  double price,  double discountPrice,  List<ProductWeightOption> weightOptions,  int stock,  Map<String, String> nutrition,  List<String> ingredients,  String storageInstructions,  bool isFeatured,  bool isBestSeller,  bool isNewArrival,  bool isRecentlyAdded,  bool isActive,  DateTime? createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _ProductModel():
-return $default(_that.id,_that.categoryId,_that.name,_that.description,_that.imageUrls,_that.priceInPaise,_that.discountPriceInPaise,_that.weightOptions,_that.stock,_that.nutrition,_that.ingredients,_that.storageInstructions,_that.isFeatured,_that.isBestSeller,_that.isNewArrival,_that.isRecentlyAdded,_that.isActive,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.categoryId,_that.name,_that.description,_that.imageUrls,_that.price,_that.discountPrice,_that.weightOptions,_that.stock,_that.nutrition,_that.ingredients,_that.storageInstructions,_that.isFeatured,_that.isBestSeller,_that.isNewArrival,_that.isRecentlyAdded,_that.isActive,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +212,10 @@ return $default(_that.id,_that.categoryId,_that.name,_that.description,_that.ima
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String categoryId,  String name,  String description,  List<String> imageUrls,  int priceInPaise,  int discountPriceInPaise,  List<ProductWeightOption> weightOptions,  int stock,  Map<String, String> nutrition,  List<String> ingredients,  String storageInstructions,  bool isFeatured,  bool isBestSeller,  bool isNewArrival,  bool isRecentlyAdded,  bool isActive,  DateTime? createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String categoryId,  String name,  String description,  List<String> imageUrls,  double price,  double discountPrice,  List<ProductWeightOption> weightOptions,  int stock,  Map<String, String> nutrition,  List<String> ingredients,  String storageInstructions,  bool isFeatured,  bool isBestSeller,  bool isNewArrival,  bool isRecentlyAdded,  bool isActive,  DateTime? createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _ProductModel() when $default != null:
-return $default(_that.id,_that.categoryId,_that.name,_that.description,_that.imageUrls,_that.priceInPaise,_that.discountPriceInPaise,_that.weightOptions,_that.stock,_that.nutrition,_that.ingredients,_that.storageInstructions,_that.isFeatured,_that.isBestSeller,_that.isNewArrival,_that.isRecentlyAdded,_that.isActive,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.categoryId,_that.name,_that.description,_that.imageUrls,_that.price,_that.discountPrice,_that.weightOptions,_that.stock,_that.nutrition,_that.ingredients,_that.storageInstructions,_that.isFeatured,_that.isBestSeller,_that.isNewArrival,_that.isRecentlyAdded,_that.isActive,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -227,7 +227,7 @@ return $default(_that.id,_that.categoryId,_that.name,_that.description,_that.ima
 @JsonSerializable()
 
 class _ProductModel implements ProductModel {
-  const _ProductModel({required this.id, required this.categoryId, required this.name, required this.description, required final  List<String> imageUrls, required this.priceInPaise, required this.discountPriceInPaise, required final  List<ProductWeightOption> weightOptions, required this.stock, required final  Map<String, String> nutrition, required final  List<String> ingredients, required this.storageInstructions, this.isFeatured = false, this.isBestSeller = false, this.isNewArrival = false, this.isRecentlyAdded = false, this.isActive = true, this.createdAt, this.updatedAt}): _imageUrls = imageUrls,_weightOptions = weightOptions,_nutrition = nutrition,_ingredients = ingredients;
+  const _ProductModel({required this.id, required this.categoryId, required this.name, required this.description, required final  List<String> imageUrls, required this.price, required this.discountPrice, required final  List<ProductWeightOption> weightOptions, required this.stock, required final  Map<String, String> nutrition, required final  List<String> ingredients, required this.storageInstructions, this.isFeatured = false, this.isBestSeller = false, this.isNewArrival = false, this.isRecentlyAdded = false, this.isActive = true, this.createdAt, this.updatedAt}): _imageUrls = imageUrls,_weightOptions = weightOptions,_nutrition = nutrition,_ingredients = ingredients;
   factory _ProductModel.fromJson(Map<String, dynamic> json) => _$ProductModelFromJson(json);
 
 @override final  String id;
@@ -241,8 +241,8 @@ class _ProductModel implements ProductModel {
   return EqualUnmodifiableListView(_imageUrls);
 }
 
-@override final  int priceInPaise;
-@override final  int discountPriceInPaise;
+@override final  double price;
+@override final  double discountPrice;
  final  List<ProductWeightOption> _weightOptions;
 @override List<ProductWeightOption> get weightOptions {
   if (_weightOptions is EqualUnmodifiableListView) return _weightOptions;
@@ -287,16 +287,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductModel&&(identical(other.id, id) || other.id == id)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other._imageUrls, _imageUrls)&&(identical(other.priceInPaise, priceInPaise) || other.priceInPaise == priceInPaise)&&(identical(other.discountPriceInPaise, discountPriceInPaise) || other.discountPriceInPaise == discountPriceInPaise)&&const DeepCollectionEquality().equals(other._weightOptions, _weightOptions)&&(identical(other.stock, stock) || other.stock == stock)&&const DeepCollectionEquality().equals(other._nutrition, _nutrition)&&const DeepCollectionEquality().equals(other._ingredients, _ingredients)&&(identical(other.storageInstructions, storageInstructions) || other.storageInstructions == storageInstructions)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.isBestSeller, isBestSeller) || other.isBestSeller == isBestSeller)&&(identical(other.isNewArrival, isNewArrival) || other.isNewArrival == isNewArrival)&&(identical(other.isRecentlyAdded, isRecentlyAdded) || other.isRecentlyAdded == isRecentlyAdded)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductModel&&(identical(other.id, id) || other.id == id)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&const DeepCollectionEquality().equals(other._imageUrls, _imageUrls)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice)&&const DeepCollectionEquality().equals(other._weightOptions, _weightOptions)&&(identical(other.stock, stock) || other.stock == stock)&&const DeepCollectionEquality().equals(other._nutrition, _nutrition)&&const DeepCollectionEquality().equals(other._ingredients, _ingredients)&&(identical(other.storageInstructions, storageInstructions) || other.storageInstructions == storageInstructions)&&(identical(other.isFeatured, isFeatured) || other.isFeatured == isFeatured)&&(identical(other.isBestSeller, isBestSeller) || other.isBestSeller == isBestSeller)&&(identical(other.isNewArrival, isNewArrival) || other.isNewArrival == isNewArrival)&&(identical(other.isRecentlyAdded, isRecentlyAdded) || other.isRecentlyAdded == isRecentlyAdded)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,categoryId,name,description,const DeepCollectionEquality().hash(_imageUrls),priceInPaise,discountPriceInPaise,const DeepCollectionEquality().hash(_weightOptions),stock,const DeepCollectionEquality().hash(_nutrition),const DeepCollectionEquality().hash(_ingredients),storageInstructions,isFeatured,isBestSeller,isNewArrival,isRecentlyAdded,isActive,createdAt,updatedAt]);
+int get hashCode => Object.hashAll([runtimeType,id,categoryId,name,description,const DeepCollectionEquality().hash(_imageUrls),price,discountPrice,const DeepCollectionEquality().hash(_weightOptions),stock,const DeepCollectionEquality().hash(_nutrition),const DeepCollectionEquality().hash(_ingredients),storageInstructions,isFeatured,isBestSeller,isNewArrival,isRecentlyAdded,isActive,createdAt,updatedAt]);
 
 @override
 String toString() {
-  return 'ProductModel(id: $id, categoryId: $categoryId, name: $name, description: $description, imageUrls: $imageUrls, priceInPaise: $priceInPaise, discountPriceInPaise: $discountPriceInPaise, weightOptions: $weightOptions, stock: $stock, nutrition: $nutrition, ingredients: $ingredients, storageInstructions: $storageInstructions, isFeatured: $isFeatured, isBestSeller: $isBestSeller, isNewArrival: $isNewArrival, isRecentlyAdded: $isRecentlyAdded, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
+  return 'ProductModel(id: $id, categoryId: $categoryId, name: $name, description: $description, imageUrls: $imageUrls, price: $price, discountPrice: $discountPrice, weightOptions: $weightOptions, stock: $stock, nutrition: $nutrition, ingredients: $ingredients, storageInstructions: $storageInstructions, isFeatured: $isFeatured, isBestSeller: $isBestSeller, isNewArrival: $isNewArrival, isRecentlyAdded: $isRecentlyAdded, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -307,7 +307,7 @@ abstract mixin class _$ProductModelCopyWith<$Res> implements $ProductModelCopyWi
   factory _$ProductModelCopyWith(_ProductModel value, $Res Function(_ProductModel) _then) = __$ProductModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String categoryId, String name, String description, List<String> imageUrls, int priceInPaise, int discountPriceInPaise, List<ProductWeightOption> weightOptions, int stock, Map<String, String> nutrition, List<String> ingredients, String storageInstructions, bool isFeatured, bool isBestSeller, bool isNewArrival, bool isRecentlyAdded, bool isActive, DateTime? createdAt, DateTime? updatedAt
+ String id, String categoryId, String name, String description, List<String> imageUrls, double price, double discountPrice, List<ProductWeightOption> weightOptions, int stock, Map<String, String> nutrition, List<String> ingredients, String storageInstructions, bool isFeatured, bool isBestSeller, bool isNewArrival, bool isRecentlyAdded, bool isActive, DateTime? createdAt, DateTime? updatedAt
 });
 
 
@@ -324,16 +324,16 @@ class __$ProductModelCopyWithImpl<$Res>
 
 /// Create a copy of ProductModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? categoryId = null,Object? name = null,Object? description = null,Object? imageUrls = null,Object? priceInPaise = null,Object? discountPriceInPaise = null,Object? weightOptions = null,Object? stock = null,Object? nutrition = null,Object? ingredients = null,Object? storageInstructions = null,Object? isFeatured = null,Object? isBestSeller = null,Object? isNewArrival = null,Object? isRecentlyAdded = null,Object? isActive = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? categoryId = null,Object? name = null,Object? description = null,Object? imageUrls = null,Object? price = null,Object? discountPrice = null,Object? weightOptions = null,Object? stock = null,Object? nutrition = null,Object? ingredients = null,Object? storageInstructions = null,Object? isFeatured = null,Object? isBestSeller = null,Object? isNewArrival = null,Object? isRecentlyAdded = null,Object? isActive = null,Object? createdAt = freezed,Object? updatedAt = freezed,}) {
   return _then(_ProductModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,categoryId: null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,imageUrls: null == imageUrls ? _self._imageUrls : imageUrls // ignore: cast_nullable_to_non_nullable
-as List<String>,priceInPaise: null == priceInPaise ? _self.priceInPaise : priceInPaise // ignore: cast_nullable_to_non_nullable
-as int,discountPriceInPaise: null == discountPriceInPaise ? _self.discountPriceInPaise : discountPriceInPaise // ignore: cast_nullable_to_non_nullable
-as int,weightOptions: null == weightOptions ? _self._weightOptions : weightOptions // ignore: cast_nullable_to_non_nullable
+as List<String>,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
+as double,discountPrice: null == discountPrice ? _self.discountPrice : discountPrice // ignore: cast_nullable_to_non_nullable
+as double,weightOptions: null == weightOptions ? _self._weightOptions : weightOptions // ignore: cast_nullable_to_non_nullable
 as List<ProductWeightOption>,stock: null == stock ? _self.stock : stock // ignore: cast_nullable_to_non_nullable
 as int,nutrition: null == nutrition ? _self._nutrition : nutrition // ignore: cast_nullable_to_non_nullable
 as Map<String, String>,ingredients: null == ingredients ? _self._ingredients : ingredients // ignore: cast_nullable_to_non_nullable
@@ -356,7 +356,7 @@ as DateTime?,
 /// @nodoc
 mixin _$ProductWeightOption {
 
- String get label; int get grams; int get priceInPaise; int get discountPriceInPaise;
+ String get label; int get grams; double get price; double get discountPrice;
 /// Create a copy of ProductWeightOption
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -369,16 +369,16 @@ $ProductWeightOptionCopyWith<ProductWeightOption> get copyWith => _$ProductWeigh
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductWeightOption&&(identical(other.label, label) || other.label == label)&&(identical(other.grams, grams) || other.grams == grams)&&(identical(other.priceInPaise, priceInPaise) || other.priceInPaise == priceInPaise)&&(identical(other.discountPriceInPaise, discountPriceInPaise) || other.discountPriceInPaise == discountPriceInPaise));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProductWeightOption&&(identical(other.label, label) || other.label == label)&&(identical(other.grams, grams) || other.grams == grams)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,label,grams,priceInPaise,discountPriceInPaise);
+int get hashCode => Object.hash(runtimeType,label,grams,price,discountPrice);
 
 @override
 String toString() {
-  return 'ProductWeightOption(label: $label, grams: $grams, priceInPaise: $priceInPaise, discountPriceInPaise: $discountPriceInPaise)';
+  return 'ProductWeightOption(label: $label, grams: $grams, price: $price, discountPrice: $discountPrice)';
 }
 
 
@@ -389,7 +389,7 @@ abstract mixin class $ProductWeightOptionCopyWith<$Res>  {
   factory $ProductWeightOptionCopyWith(ProductWeightOption value, $Res Function(ProductWeightOption) _then) = _$ProductWeightOptionCopyWithImpl;
 @useResult
 $Res call({
- String label, int grams, int priceInPaise, int discountPriceInPaise
+ String label, int grams, double price, double discountPrice
 });
 
 
@@ -406,13 +406,13 @@ class _$ProductWeightOptionCopyWithImpl<$Res>
 
 /// Create a copy of ProductWeightOption
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? label = null,Object? grams = null,Object? priceInPaise = null,Object? discountPriceInPaise = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? label = null,Object? grams = null,Object? price = null,Object? discountPrice = null,}) {
   return _then(_self.copyWith(
 label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String,grams: null == grams ? _self.grams : grams // ignore: cast_nullable_to_non_nullable
-as int,priceInPaise: null == priceInPaise ? _self.priceInPaise : priceInPaise // ignore: cast_nullable_to_non_nullable
-as int,discountPriceInPaise: null == discountPriceInPaise ? _self.discountPriceInPaise : discountPriceInPaise // ignore: cast_nullable_to_non_nullable
-as int,
+as int,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
+as double,discountPrice: null == discountPrice ? _self.discountPrice : discountPrice // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 
@@ -497,10 +497,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String label,  int grams,  int priceInPaise,  int discountPriceInPaise)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String label,  int grams,  double price,  double discountPrice)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProductWeightOption() when $default != null:
-return $default(_that.label,_that.grams,_that.priceInPaise,_that.discountPriceInPaise);case _:
+return $default(_that.label,_that.grams,_that.price,_that.discountPrice);case _:
   return orElse();
 
 }
@@ -518,10 +518,10 @@ return $default(_that.label,_that.grams,_that.priceInPaise,_that.discountPriceIn
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String label,  int grams,  int priceInPaise,  int discountPriceInPaise)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String label,  int grams,  double price,  double discountPrice)  $default,) {final _that = this;
 switch (_that) {
 case _ProductWeightOption():
-return $default(_that.label,_that.grams,_that.priceInPaise,_that.discountPriceInPaise);case _:
+return $default(_that.label,_that.grams,_that.price,_that.discountPrice);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -538,10 +538,10 @@ return $default(_that.label,_that.grams,_that.priceInPaise,_that.discountPriceIn
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String label,  int grams,  int priceInPaise,  int discountPriceInPaise)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String label,  int grams,  double price,  double discountPrice)?  $default,) {final _that = this;
 switch (_that) {
 case _ProductWeightOption() when $default != null:
-return $default(_that.label,_that.grams,_that.priceInPaise,_that.discountPriceInPaise);case _:
+return $default(_that.label,_that.grams,_that.price,_that.discountPrice);case _:
   return null;
 
 }
@@ -553,13 +553,13 @@ return $default(_that.label,_that.grams,_that.priceInPaise,_that.discountPriceIn
 @JsonSerializable()
 
 class _ProductWeightOption implements ProductWeightOption {
-  const _ProductWeightOption({required this.label, required this.grams, required this.priceInPaise, required this.discountPriceInPaise});
+  const _ProductWeightOption({required this.label, required this.grams, required this.price, required this.discountPrice});
   factory _ProductWeightOption.fromJson(Map<String, dynamic> json) => _$ProductWeightOptionFromJson(json);
 
 @override final  String label;
 @override final  int grams;
-@override final  int priceInPaise;
-@override final  int discountPriceInPaise;
+@override final  double price;
+@override final  double discountPrice;
 
 /// Create a copy of ProductWeightOption
 /// with the given fields replaced by the non-null parameter values.
@@ -574,16 +574,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductWeightOption&&(identical(other.label, label) || other.label == label)&&(identical(other.grams, grams) || other.grams == grams)&&(identical(other.priceInPaise, priceInPaise) || other.priceInPaise == priceInPaise)&&(identical(other.discountPriceInPaise, discountPriceInPaise) || other.discountPriceInPaise == discountPriceInPaise));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProductWeightOption&&(identical(other.label, label) || other.label == label)&&(identical(other.grams, grams) || other.grams == grams)&&(identical(other.price, price) || other.price == price)&&(identical(other.discountPrice, discountPrice) || other.discountPrice == discountPrice));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,label,grams,priceInPaise,discountPriceInPaise);
+int get hashCode => Object.hash(runtimeType,label,grams,price,discountPrice);
 
 @override
 String toString() {
-  return 'ProductWeightOption(label: $label, grams: $grams, priceInPaise: $priceInPaise, discountPriceInPaise: $discountPriceInPaise)';
+  return 'ProductWeightOption(label: $label, grams: $grams, price: $price, discountPrice: $discountPrice)';
 }
 
 
@@ -594,7 +594,7 @@ abstract mixin class _$ProductWeightOptionCopyWith<$Res> implements $ProductWeig
   factory _$ProductWeightOptionCopyWith(_ProductWeightOption value, $Res Function(_ProductWeightOption) _then) = __$ProductWeightOptionCopyWithImpl;
 @override @useResult
 $Res call({
- String label, int grams, int priceInPaise, int discountPriceInPaise
+ String label, int grams, double price, double discountPrice
 });
 
 
@@ -611,13 +611,13 @@ class __$ProductWeightOptionCopyWithImpl<$Res>
 
 /// Create a copy of ProductWeightOption
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? label = null,Object? grams = null,Object? priceInPaise = null,Object? discountPriceInPaise = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? label = null,Object? grams = null,Object? price = null,Object? discountPrice = null,}) {
   return _then(_ProductWeightOption(
 label: null == label ? _self.label : label // ignore: cast_nullable_to_non_nullable
 as String,grams: null == grams ? _self.grams : grams // ignore: cast_nullable_to_non_nullable
-as int,priceInPaise: null == priceInPaise ? _self.priceInPaise : priceInPaise // ignore: cast_nullable_to_non_nullable
-as int,discountPriceInPaise: null == discountPriceInPaise ? _self.discountPriceInPaise : discountPriceInPaise // ignore: cast_nullable_to_non_nullable
-as int,
+as int,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
+as double,discountPrice: null == discountPrice ? _self.discountPrice : discountPrice // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 

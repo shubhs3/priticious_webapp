@@ -71,9 +71,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         customerId: customerId,
         items: summary.items,
         shippingAddress: address,
-        subtotalInPaise: summary.subtotalInPaise,
-        deliveryChargeInPaise: summary.deliveryChargeInPaise,
-        totalInPaise: summary.totalInPaise,
+        subtotal: summary.subtotal,
+        deliveryCharge: summary.deliveryCharge,
+        total: summary.total,
         status: OrderStatus.pending,
         paymentMethod: PaymentMethod.cashOnDelivery,
         deliveryInstructions: _instructionsController.text.trim().isEmpty
@@ -299,8 +299,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 ),
                               ),
                               Text(
-                                MoneyFormatter.formatPaise(
-                                  item.unitPriceInPaise * item.quantity,
+                                MoneyFormatter.format(
+                                  item.unitPrice * item.quantity,
                                 ),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
@@ -315,7 +315,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         children: [
                           const Text('Subtotal'),
                           Text(
-                            MoneyFormatter.formatPaise(summary.subtotalInPaise),
+                            MoneyFormatter.format(summary.subtotal),
                           ),
                         ],
                       ),
@@ -325,16 +325,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         children: [
                           const Text('Delivery Charges'),
                           Text(
-                            summary.deliveryChargeInPaise == 0
+                            summary.deliveryCharge == 0.0
                                 ? 'FREE'
-                                : MoneyFormatter.formatPaise(
-                                    summary.deliveryChargeInPaise,
+                                : MoneyFormatter.format(
+                                    summary.deliveryCharge,
                                   ),
                             style: TextStyle(
-                              color: summary.deliveryChargeInPaise == 0
+                              color: summary.deliveryCharge == 0.0
                                   ? Colors.green
                                   : null,
-                              fontWeight: summary.deliveryChargeInPaise == 0
+                              fontWeight: summary.deliveryCharge == 0.0
                                   ? FontWeight.bold
                                   : null,
                             ),
@@ -355,7 +355,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                 ),
                           ),
                           Text(
-                            MoneyFormatter.formatPaise(summary.totalInPaise),
+                            MoneyFormatter.format(summary.total),
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium

@@ -39,7 +39,7 @@ class CartScreen extends ConsumerWidget {
                           ),
                           title: Text(item.name),
                           subtitle: Text(
-                            '${item.weightOption.label} • ${MoneyFormatter.formatPaise(item.unitPriceInPaise)} x ${item.quantity} = ${MoneyFormatter.formatPaise(item.unitPriceInPaise * item.quantity)}',
+                            '${item.weightOption.label} • ${MoneyFormatter.format(item.unitPrice)} x ${item.quantity} = ${MoneyFormatter.format(item.unitPrice * item.quantity)}',
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -106,20 +106,20 @@ class _PriceBreakdown extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _row('Subtotal ($totalItems items)', summary.subtotalInPaise),
-            _row('Delivery', summary.deliveryChargeInPaise),
+            _row('Subtotal ($totalItems items)', summary.subtotal),
+            _row('Delivery', summary.deliveryCharge),
             if (AppConstants.enableDeliveryCharges) ...[
-              if (summary.subtotalInPaise < AppConstants.freeDeliveryThresholdInPaise && summary.subtotalInPaise > 0) ...[
+              if (summary.subtotal < AppConstants.freeDeliveryThreshold && summary.subtotal > 0.0) ...[
                 const SizedBox(height: 8),
                 Text(
-                  'Add ${MoneyFormatter.formatPaise(AppConstants.freeDeliveryThresholdInPaise - summary.subtotalInPaise)} more for FREE delivery!',
+                  'Add ${MoneyFormatter.format(AppConstants.freeDeliveryThreshold - summary.subtotal)} more for FREE delivery!',
                   style: TextStyle(
                     color: Colors.orange[800],
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
                 ),
-              ] else if (summary.subtotalInPaise >= AppConstants.freeDeliveryThresholdInPaise) ...[
+              ] else if (summary.subtotal >= AppConstants.freeDeliveryThreshold) ...[
                 const SizedBox(height: 8),
                 const Text(
                   '🎉 You qualify for FREE delivery!',
@@ -130,7 +130,7 @@ class _PriceBreakdown extends StatelessWidget {
                   ),
                 ),
               ],
-            ] else if (summary.subtotalInPaise > 0) ...[
+            ] else if (summary.subtotal > 0.0) ...[
               const SizedBox(height: 8),
               const Text(
                 '🎉 Free delivery on all orders!',
@@ -142,21 +142,21 @@ class _PriceBreakdown extends StatelessWidget {
               ),
             ],
             const Divider(height: 24),
-            _row('Total', summary.totalInPaise, bold: true),
+            _row('Total', summary.total, bold: true),
           ],
         ),
       ),
     );
   }
 
-  Widget _row(String label, int amount, {bool bold = false}) {
+  Widget _row(String label, double amount, {bool bold = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Expanded(child: Text(label)),
           Text(
-            MoneyFormatter.formatPaise(amount),
+            MoneyFormatter.format(amount),
             style: TextStyle(
               fontWeight: bold ? FontWeight.w800 : FontWeight.w500,
             ),

@@ -14,7 +14,7 @@ _CartItemModel _$CartItemModelFromJson(Map<String, dynamic> json) =>
       weightOption: ProductWeightOption.fromJson(
         json['weightOption'] as Map<String, dynamic>,
       ),
-      unitPriceInPaise: (json['unitPriceInPaise'] as num).toInt(),
+      unitPrice: (json['unitPrice'] as num).toDouble(),
       quantity: (json['quantity'] as num).toInt(),
     );
 
@@ -24,7 +24,7 @@ Map<String, dynamic> _$CartItemModelToJson(_CartItemModel instance) =>
       'name': instance.name,
       'imageUrl': instance.imageUrl,
       'weightOption': instance.weightOption,
-      'unitPriceInPaise': instance.unitPriceInPaise,
+      'unitPrice': instance.unitPrice,
       'quantity': instance.quantity,
     };
 
@@ -33,17 +33,17 @@ _CartSummaryModel _$CartSummaryModelFromJson(Map<String, dynamic> json) =>
       items: (json['items'] as List<dynamic>)
           .map((e) => CartItemModel.fromJson(e as Map<String, dynamic>))
           .toList(),
-      subtotalInPaise: (json['subtotalInPaise'] as num).toInt(),
-      discountInPaise: (json['discountInPaise'] as num).toInt(),
-      deliveryChargeInPaise: (json['deliveryChargeInPaise'] as num).toInt(),
-      totalInPaise: (json['totalInPaise'] as num).toInt(),
+      subtotal: (json['subtotal'] as num).toDouble(),
+      discount: (json['discount'] as num).toDouble(),
+      deliveryCharge: (json['deliveryCharge'] as num).toDouble(),
+      total: (json['total'] as num).toDouble(),
     );
 
 Map<String, dynamic> _$CartSummaryModelToJson(_CartSummaryModel instance) =>
     <String, dynamic>{
       'items': instance.items,
-      'subtotalInPaise': instance.subtotalInPaise,
-      'discountInPaise': instance.discountInPaise,
-      'deliveryChargeInPaise': instance.deliveryChargeInPaise,
-      'totalInPaise': instance.totalInPaise,
+      'subtotal': instance.subtotal,
+      'discount': instance.discount,
+      'deliveryCharge': instance.deliveryCharge,
+      'total': instance.total,
     };

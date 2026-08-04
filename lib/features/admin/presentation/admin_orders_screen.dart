@@ -153,11 +153,11 @@ class _AdminOrderCard extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('Subtotal: ${MoneyFormatter.formatPaise(order.subtotalInPaise)}'),
-                        Text('Delivery: ${MoneyFormatter.formatPaise(order.deliveryChargeInPaise)}'),
+                        Text('Subtotal: ${MoneyFormatter.format(order.subtotal)}'),
+                        Text('Delivery: ${MoneyFormatter.format(order.deliveryCharge)}'),
                         const SizedBox(height: 4),
                         Text(
-                          'Total: ${MoneyFormatter.formatPaise(order.totalInPaise)}',
+                          'Total: ${MoneyFormatter.format(order.total)}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.primary,

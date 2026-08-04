@@ -15,8 +15,8 @@ _ProductModel _$ProductModelFromJson(Map<String, dynamic> json) =>
       imageUrls: (json['imageUrls'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
-      priceInPaise: (json['priceInPaise'] as num).toInt(),
-      discountPriceInPaise: (json['discountPriceInPaise'] as num).toInt(),
+      price: (json['price'] as num).toDouble(),
+      discountPrice: (json['discountPrice'] as num).toDouble(),
       weightOptions: (json['weightOptions'] as List<dynamic>)
           .map((e) => ProductWeightOption.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -46,8 +46,8 @@ Map<String, dynamic> _$ProductModelToJson(_ProductModel instance) =>
       'name': instance.name,
       'description': instance.description,
       'imageUrls': instance.imageUrls,
-      'priceInPaise': instance.priceInPaise,
-      'discountPriceInPaise': instance.discountPriceInPaise,
+      'price': instance.price,
+      'discountPrice': instance.discountPrice,
       'weightOptions': instance.weightOptions,
       'stock': instance.stock,
       'nutrition': instance.nutrition,
@@ -66,8 +66,8 @@ _ProductWeightOption _$ProductWeightOptionFromJson(Map<String, dynamic> json) =>
     _ProductWeightOption(
       label: json['label'] as String,
       grams: (json['grams'] as num).toInt(),
-      priceInPaise: (json['priceInPaise'] as num).toInt(),
-      discountPriceInPaise: (json['discountPriceInPaise'] as num).toInt(),
+      price: (json['price'] as num).toDouble(),
+      discountPrice: (json['discountPrice'] as num).toDouble(),
     );
 
 Map<String, dynamic> _$ProductWeightOptionToJson(
@@ -75,6 +75,6 @@ Map<String, dynamic> _$ProductWeightOptionToJson(
 ) => <String, dynamic>{
   'label': instance.label,
   'grams': instance.grams,
-  'priceInPaise': instance.priceInPaise,
-  'discountPriceInPaise': instance.discountPriceInPaise,
+  'price': instance.price,
+  'discountPrice': instance.discountPrice,
 };

@@ -15,9 +15,9 @@ _OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => _OrderModel(
   shippingAddress: AddressModel.fromJson(
     json['shippingAddress'] as Map<String, dynamic>,
   ),
-  subtotalInPaise: (json['subtotalInPaise'] as num).toInt(),
-  deliveryChargeInPaise: (json['deliveryChargeInPaise'] as num).toInt(),
-  totalInPaise: (json['totalInPaise'] as num).toInt(),
+  subtotal: (json['subtotal'] as num).toDouble(),
+  deliveryCharge: (json['deliveryCharge'] as num).toDouble(),
+  total: (json['total'] as num).toDouble(),
   status: $enumDecode(_$OrderStatusEnumMap, json['status']),
   paymentMethod:
       $enumDecodeNullable(_$PaymentMethodEnumMap, json['paymentMethod']) ??
@@ -37,9 +37,9 @@ Map<String, dynamic> _$OrderModelToJson(_OrderModel instance) =>
       'customerId': instance.customerId,
       'items': instance.items,
       'shippingAddress': instance.shippingAddress,
-      'subtotalInPaise': instance.subtotalInPaise,
-      'deliveryChargeInPaise': instance.deliveryChargeInPaise,
-      'totalInPaise': instance.totalInPaise,
+      'subtotal': instance.subtotal,
+      'deliveryCharge': instance.deliveryCharge,
+      'total': instance.total,
       'status': _$OrderStatusEnumMap[instance.status]!,
       'paymentMethod': _$PaymentMethodEnumMap[instance.paymentMethod]!,
       'deliveryInstructions': instance.deliveryInstructions,

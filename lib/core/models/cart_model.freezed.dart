@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CartItemModel {
 
- String get productId; String get name; String get imageUrl; ProductWeightOption get weightOption; int get unitPriceInPaise; int get quantity;
+ String get productId; String get name; String get imageUrl; ProductWeightOption get weightOption; double get unitPrice; int get quantity;
 /// Create a copy of CartItemModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $CartItemModelCopyWith<CartItemModel> get copyWith => _$CartItemModelCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CartItemModel&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.name, name) || other.name == name)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.weightOption, weightOption) || other.weightOption == weightOption)&&(identical(other.unitPriceInPaise, unitPriceInPaise) || other.unitPriceInPaise == unitPriceInPaise)&&(identical(other.quantity, quantity) || other.quantity == quantity));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CartItemModel&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.name, name) || other.name == name)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.weightOption, weightOption) || other.weightOption == weightOption)&&(identical(other.unitPrice, unitPrice) || other.unitPrice == unitPrice)&&(identical(other.quantity, quantity) || other.quantity == quantity));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,productId,name,imageUrl,weightOption,unitPriceInPaise,quantity);
+int get hashCode => Object.hash(runtimeType,productId,name,imageUrl,weightOption,unitPrice,quantity);
 
 @override
 String toString() {
-  return 'CartItemModel(productId: $productId, name: $name, imageUrl: $imageUrl, weightOption: $weightOption, unitPriceInPaise: $unitPriceInPaise, quantity: $quantity)';
+  return 'CartItemModel(productId: $productId, name: $name, imageUrl: $imageUrl, weightOption: $weightOption, unitPrice: $unitPrice, quantity: $quantity)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $CartItemModelCopyWith<$Res>  {
   factory $CartItemModelCopyWith(CartItemModel value, $Res Function(CartItemModel) _then) = _$CartItemModelCopyWithImpl;
 @useResult
 $Res call({
- String productId, String name, String imageUrl, ProductWeightOption weightOption, int unitPriceInPaise, int quantity
+ String productId, String name, String imageUrl, ProductWeightOption weightOption, double unitPrice, int quantity
 });
 
 
@@ -65,14 +65,14 @@ class _$CartItemModelCopyWithImpl<$Res>
 
 /// Create a copy of CartItemModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? productId = null,Object? name = null,Object? imageUrl = null,Object? weightOption = null,Object? unitPriceInPaise = null,Object? quantity = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? productId = null,Object? name = null,Object? imageUrl = null,Object? weightOption = null,Object? unitPrice = null,Object? quantity = null,}) {
   return _then(_self.copyWith(
 productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String,weightOption: null == weightOption ? _self.weightOption : weightOption // ignore: cast_nullable_to_non_nullable
-as ProductWeightOption,unitPriceInPaise: null == unitPriceInPaise ? _self.unitPriceInPaise : unitPriceInPaise // ignore: cast_nullable_to_non_nullable
-as int,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
+as ProductWeightOption,unitPrice: null == unitPrice ? _self.unitPrice : unitPrice // ignore: cast_nullable_to_non_nullable
+as double,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -167,10 +167,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String productId,  String name,  String imageUrl,  ProductWeightOption weightOption,  int unitPriceInPaise,  int quantity)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String productId,  String name,  String imageUrl,  ProductWeightOption weightOption,  double unitPrice,  int quantity)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CartItemModel() when $default != null:
-return $default(_that.productId,_that.name,_that.imageUrl,_that.weightOption,_that.unitPriceInPaise,_that.quantity);case _:
+return $default(_that.productId,_that.name,_that.imageUrl,_that.weightOption,_that.unitPrice,_that.quantity);case _:
   return orElse();
 
 }
@@ -188,10 +188,10 @@ return $default(_that.productId,_that.name,_that.imageUrl,_that.weightOption,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String productId,  String name,  String imageUrl,  ProductWeightOption weightOption,  int unitPriceInPaise,  int quantity)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String productId,  String name,  String imageUrl,  ProductWeightOption weightOption,  double unitPrice,  int quantity)  $default,) {final _that = this;
 switch (_that) {
 case _CartItemModel():
-return $default(_that.productId,_that.name,_that.imageUrl,_that.weightOption,_that.unitPriceInPaise,_that.quantity);case _:
+return $default(_that.productId,_that.name,_that.imageUrl,_that.weightOption,_that.unitPrice,_that.quantity);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -208,10 +208,10 @@ return $default(_that.productId,_that.name,_that.imageUrl,_that.weightOption,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String productId,  String name,  String imageUrl,  ProductWeightOption weightOption,  int unitPriceInPaise,  int quantity)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String productId,  String name,  String imageUrl,  ProductWeightOption weightOption,  double unitPrice,  int quantity)?  $default,) {final _that = this;
 switch (_that) {
 case _CartItemModel() when $default != null:
-return $default(_that.productId,_that.name,_that.imageUrl,_that.weightOption,_that.unitPriceInPaise,_that.quantity);case _:
+return $default(_that.productId,_that.name,_that.imageUrl,_that.weightOption,_that.unitPrice,_that.quantity);case _:
   return null;
 
 }
@@ -223,14 +223,14 @@ return $default(_that.productId,_that.name,_that.imageUrl,_that.weightOption,_th
 @JsonSerializable()
 
 class _CartItemModel implements CartItemModel {
-  const _CartItemModel({required this.productId, required this.name, required this.imageUrl, required this.weightOption, required this.unitPriceInPaise, required this.quantity});
+  const _CartItemModel({required this.productId, required this.name, required this.imageUrl, required this.weightOption, required this.unitPrice, required this.quantity});
   factory _CartItemModel.fromJson(Map<String, dynamic> json) => _$CartItemModelFromJson(json);
 
 @override final  String productId;
 @override final  String name;
 @override final  String imageUrl;
 @override final  ProductWeightOption weightOption;
-@override final  int unitPriceInPaise;
+@override final  double unitPrice;
 @override final  int quantity;
 
 /// Create a copy of CartItemModel
@@ -246,16 +246,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CartItemModel&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.name, name) || other.name == name)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.weightOption, weightOption) || other.weightOption == weightOption)&&(identical(other.unitPriceInPaise, unitPriceInPaise) || other.unitPriceInPaise == unitPriceInPaise)&&(identical(other.quantity, quantity) || other.quantity == quantity));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CartItemModel&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.name, name) || other.name == name)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.weightOption, weightOption) || other.weightOption == weightOption)&&(identical(other.unitPrice, unitPrice) || other.unitPrice == unitPrice)&&(identical(other.quantity, quantity) || other.quantity == quantity));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,productId,name,imageUrl,weightOption,unitPriceInPaise,quantity);
+int get hashCode => Object.hash(runtimeType,productId,name,imageUrl,weightOption,unitPrice,quantity);
 
 @override
 String toString() {
-  return 'CartItemModel(productId: $productId, name: $name, imageUrl: $imageUrl, weightOption: $weightOption, unitPriceInPaise: $unitPriceInPaise, quantity: $quantity)';
+  return 'CartItemModel(productId: $productId, name: $name, imageUrl: $imageUrl, weightOption: $weightOption, unitPrice: $unitPrice, quantity: $quantity)';
 }
 
 
@@ -266,7 +266,7 @@ abstract mixin class _$CartItemModelCopyWith<$Res> implements $CartItemModelCopy
   factory _$CartItemModelCopyWith(_CartItemModel value, $Res Function(_CartItemModel) _then) = __$CartItemModelCopyWithImpl;
 @override @useResult
 $Res call({
- String productId, String name, String imageUrl, ProductWeightOption weightOption, int unitPriceInPaise, int quantity
+ String productId, String name, String imageUrl, ProductWeightOption weightOption, double unitPrice, int quantity
 });
 
 
@@ -283,14 +283,14 @@ class __$CartItemModelCopyWithImpl<$Res>
 
 /// Create a copy of CartItemModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? productId = null,Object? name = null,Object? imageUrl = null,Object? weightOption = null,Object? unitPriceInPaise = null,Object? quantity = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? productId = null,Object? name = null,Object? imageUrl = null,Object? weightOption = null,Object? unitPrice = null,Object? quantity = null,}) {
   return _then(_CartItemModel(
 productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
 as String,weightOption: null == weightOption ? _self.weightOption : weightOption // ignore: cast_nullable_to_non_nullable
-as ProductWeightOption,unitPriceInPaise: null == unitPriceInPaise ? _self.unitPriceInPaise : unitPriceInPaise // ignore: cast_nullable_to_non_nullable
-as int,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
+as ProductWeightOption,unitPrice: null == unitPrice ? _self.unitPrice : unitPrice // ignore: cast_nullable_to_non_nullable
+as double,quantity: null == quantity ? _self.quantity : quantity // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -311,7 +311,7 @@ $ProductWeightOptionCopyWith<$Res> get weightOption {
 /// @nodoc
 mixin _$CartSummaryModel {
 
- List<CartItemModel> get items; int get subtotalInPaise; int get discountInPaise; int get deliveryChargeInPaise; int get totalInPaise;
+ List<CartItemModel> get items; double get subtotal; double get discount; double get deliveryCharge; double get total;
 /// Create a copy of CartSummaryModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -324,16 +324,16 @@ $CartSummaryModelCopyWith<CartSummaryModel> get copyWith => _$CartSummaryModelCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CartSummaryModel&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.subtotalInPaise, subtotalInPaise) || other.subtotalInPaise == subtotalInPaise)&&(identical(other.discountInPaise, discountInPaise) || other.discountInPaise == discountInPaise)&&(identical(other.deliveryChargeInPaise, deliveryChargeInPaise) || other.deliveryChargeInPaise == deliveryChargeInPaise)&&(identical(other.totalInPaise, totalInPaise) || other.totalInPaise == totalInPaise));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CartSummaryModel&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.discount, discount) || other.discount == discount)&&(identical(other.deliveryCharge, deliveryCharge) || other.deliveryCharge == deliveryCharge)&&(identical(other.total, total) || other.total == total));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(items),subtotalInPaise,discountInPaise,deliveryChargeInPaise,totalInPaise);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(items),subtotal,discount,deliveryCharge,total);
 
 @override
 String toString() {
-  return 'CartSummaryModel(items: $items, subtotalInPaise: $subtotalInPaise, discountInPaise: $discountInPaise, deliveryChargeInPaise: $deliveryChargeInPaise, totalInPaise: $totalInPaise)';
+  return 'CartSummaryModel(items: $items, subtotal: $subtotal, discount: $discount, deliveryCharge: $deliveryCharge, total: $total)';
 }
 
 
@@ -344,7 +344,7 @@ abstract mixin class $CartSummaryModelCopyWith<$Res>  {
   factory $CartSummaryModelCopyWith(CartSummaryModel value, $Res Function(CartSummaryModel) _then) = _$CartSummaryModelCopyWithImpl;
 @useResult
 $Res call({
- List<CartItemModel> items, int subtotalInPaise, int discountInPaise, int deliveryChargeInPaise, int totalInPaise
+ List<CartItemModel> items, double subtotal, double discount, double deliveryCharge, double total
 });
 
 
@@ -361,14 +361,14 @@ class _$CartSummaryModelCopyWithImpl<$Res>
 
 /// Create a copy of CartSummaryModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? subtotalInPaise = null,Object? discountInPaise = null,Object? deliveryChargeInPaise = null,Object? totalInPaise = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? items = null,Object? subtotal = null,Object? discount = null,Object? deliveryCharge = null,Object? total = null,}) {
   return _then(_self.copyWith(
 items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
-as List<CartItemModel>,subtotalInPaise: null == subtotalInPaise ? _self.subtotalInPaise : subtotalInPaise // ignore: cast_nullable_to_non_nullable
-as int,discountInPaise: null == discountInPaise ? _self.discountInPaise : discountInPaise // ignore: cast_nullable_to_non_nullable
-as int,deliveryChargeInPaise: null == deliveryChargeInPaise ? _self.deliveryChargeInPaise : deliveryChargeInPaise // ignore: cast_nullable_to_non_nullable
-as int,totalInPaise: null == totalInPaise ? _self.totalInPaise : totalInPaise // ignore: cast_nullable_to_non_nullable
-as int,
+as List<CartItemModel>,subtotal: null == subtotal ? _self.subtotal : subtotal // ignore: cast_nullable_to_non_nullable
+as double,discount: null == discount ? _self.discount : discount // ignore: cast_nullable_to_non_nullable
+as double,deliveryCharge: null == deliveryCharge ? _self.deliveryCharge : deliveryCharge // ignore: cast_nullable_to_non_nullable
+as double,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 
@@ -453,10 +453,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<CartItemModel> items,  int subtotalInPaise,  int discountInPaise,  int deliveryChargeInPaise,  int totalInPaise)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<CartItemModel> items,  double subtotal,  double discount,  double deliveryCharge,  double total)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CartSummaryModel() when $default != null:
-return $default(_that.items,_that.subtotalInPaise,_that.discountInPaise,_that.deliveryChargeInPaise,_that.totalInPaise);case _:
+return $default(_that.items,_that.subtotal,_that.discount,_that.deliveryCharge,_that.total);case _:
   return orElse();
 
 }
@@ -474,10 +474,10 @@ return $default(_that.items,_that.subtotalInPaise,_that.discountInPaise,_that.de
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<CartItemModel> items,  int subtotalInPaise,  int discountInPaise,  int deliveryChargeInPaise,  int totalInPaise)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<CartItemModel> items,  double subtotal,  double discount,  double deliveryCharge,  double total)  $default,) {final _that = this;
 switch (_that) {
 case _CartSummaryModel():
-return $default(_that.items,_that.subtotalInPaise,_that.discountInPaise,_that.deliveryChargeInPaise,_that.totalInPaise);case _:
+return $default(_that.items,_that.subtotal,_that.discount,_that.deliveryCharge,_that.total);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -494,10 +494,10 @@ return $default(_that.items,_that.subtotalInPaise,_that.discountInPaise,_that.de
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<CartItemModel> items,  int subtotalInPaise,  int discountInPaise,  int deliveryChargeInPaise,  int totalInPaise)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<CartItemModel> items,  double subtotal,  double discount,  double deliveryCharge,  double total)?  $default,) {final _that = this;
 switch (_that) {
 case _CartSummaryModel() when $default != null:
-return $default(_that.items,_that.subtotalInPaise,_that.discountInPaise,_that.deliveryChargeInPaise,_that.totalInPaise);case _:
+return $default(_that.items,_that.subtotal,_that.discount,_that.deliveryCharge,_that.total);case _:
   return null;
 
 }
@@ -509,7 +509,7 @@ return $default(_that.items,_that.subtotalInPaise,_that.discountInPaise,_that.de
 @JsonSerializable()
 
 class _CartSummaryModel implements CartSummaryModel {
-  const _CartSummaryModel({required final  List<CartItemModel> items, required this.subtotalInPaise, required this.discountInPaise, required this.deliveryChargeInPaise, required this.totalInPaise}): _items = items;
+  const _CartSummaryModel({required final  List<CartItemModel> items, required this.subtotal, required this.discount, required this.deliveryCharge, required this.total}): _items = items;
   factory _CartSummaryModel.fromJson(Map<String, dynamic> json) => _$CartSummaryModelFromJson(json);
 
  final  List<CartItemModel> _items;
@@ -519,10 +519,10 @@ class _CartSummaryModel implements CartSummaryModel {
   return EqualUnmodifiableListView(_items);
 }
 
-@override final  int subtotalInPaise;
-@override final  int discountInPaise;
-@override final  int deliveryChargeInPaise;
-@override final  int totalInPaise;
+@override final  double subtotal;
+@override final  double discount;
+@override final  double deliveryCharge;
+@override final  double total;
 
 /// Create a copy of CartSummaryModel
 /// with the given fields replaced by the non-null parameter values.
@@ -537,16 +537,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CartSummaryModel&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.subtotalInPaise, subtotalInPaise) || other.subtotalInPaise == subtotalInPaise)&&(identical(other.discountInPaise, discountInPaise) || other.discountInPaise == discountInPaise)&&(identical(other.deliveryChargeInPaise, deliveryChargeInPaise) || other.deliveryChargeInPaise == deliveryChargeInPaise)&&(identical(other.totalInPaise, totalInPaise) || other.totalInPaise == totalInPaise));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CartSummaryModel&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.discount, discount) || other.discount == discount)&&(identical(other.deliveryCharge, deliveryCharge) || other.deliveryCharge == deliveryCharge)&&(identical(other.total, total) || other.total == total));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),subtotalInPaise,discountInPaise,deliveryChargeInPaise,totalInPaise);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_items),subtotal,discount,deliveryCharge,total);
 
 @override
 String toString() {
-  return 'CartSummaryModel(items: $items, subtotalInPaise: $subtotalInPaise, discountInPaise: $discountInPaise, deliveryChargeInPaise: $deliveryChargeInPaise, totalInPaise: $totalInPaise)';
+  return 'CartSummaryModel(items: $items, subtotal: $subtotal, discount: $discount, deliveryCharge: $deliveryCharge, total: $total)';
 }
 
 
@@ -557,7 +557,7 @@ abstract mixin class _$CartSummaryModelCopyWith<$Res> implements $CartSummaryMod
   factory _$CartSummaryModelCopyWith(_CartSummaryModel value, $Res Function(_CartSummaryModel) _then) = __$CartSummaryModelCopyWithImpl;
 @override @useResult
 $Res call({
- List<CartItemModel> items, int subtotalInPaise, int discountInPaise, int deliveryChargeInPaise, int totalInPaise
+ List<CartItemModel> items, double subtotal, double discount, double deliveryCharge, double total
 });
 
 
@@ -574,14 +574,14 @@ class __$CartSummaryModelCopyWithImpl<$Res>
 
 /// Create a copy of CartSummaryModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? items = null,Object? subtotalInPaise = null,Object? discountInPaise = null,Object? deliveryChargeInPaise = null,Object? totalInPaise = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? items = null,Object? subtotal = null,Object? discount = null,Object? deliveryCharge = null,Object? total = null,}) {
   return _then(_CartSummaryModel(
 items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
-as List<CartItemModel>,subtotalInPaise: null == subtotalInPaise ? _self.subtotalInPaise : subtotalInPaise // ignore: cast_nullable_to_non_nullable
-as int,discountInPaise: null == discountInPaise ? _self.discountInPaise : discountInPaise // ignore: cast_nullable_to_non_nullable
-as int,deliveryChargeInPaise: null == deliveryChargeInPaise ? _self.deliveryChargeInPaise : deliveryChargeInPaise // ignore: cast_nullable_to_non_nullable
-as int,totalInPaise: null == totalInPaise ? _self.totalInPaise : totalInPaise // ignore: cast_nullable_to_non_nullable
-as int,
+as List<CartItemModel>,subtotal: null == subtotal ? _self.subtotal : subtotal // ignore: cast_nullable_to_non_nullable
+as double,discount: null == discount ? _self.discount : discount // ignore: cast_nullable_to_non_nullable
+as double,deliveryCharge: null == deliveryCharge ? _self.deliveryCharge : deliveryCharge // ignore: cast_nullable_to_non_nullable
+as double,total: null == total ? _self.total : total // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 

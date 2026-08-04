@@ -12,7 +12,7 @@ abstract class CartItemModel with _$CartItemModel {
     required String name,
     required String imageUrl,
     required ProductWeightOption weightOption,
-    required int unitPriceInPaise,
+    required double unitPrice,
     required int quantity,
   }) = _CartItemModel;
 
@@ -24,10 +24,10 @@ abstract class CartItemModel with _$CartItemModel {
 abstract class CartSummaryModel with _$CartSummaryModel {
   const factory CartSummaryModel({
     required List<CartItemModel> items,
-    required int subtotalInPaise,
-    required int discountInPaise,
-    required int deliveryChargeInPaise,
-    required int totalInPaise,
+    required double subtotal,
+    required double discount,
+    required double deliveryCharge,
+    required double total,
   }) = _CartSummaryModel;
 
   factory CartSummaryModel.fromJson(Map<String, dynamic> json) =>

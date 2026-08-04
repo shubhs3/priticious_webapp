@@ -76,7 +76,7 @@ class ProductCard extends ConsumerWidget {
                               ),
                             ),
                     ),
-                    if (product.discountPriceInPaise < product.priceInPaise)
+                    if (product.discountPrice < product.price)
                       Positioned(
                         top: 8,
                         left: 8,
@@ -128,9 +128,9 @@ class ProductCard extends ConsumerWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (product.discountPriceInPaise < product.priceInPaise)
+                          if (product.discountPrice < product.price)
                             Text(
-                              MoneyFormatter.formatPaise(product.priceInPaise),
+                              MoneyFormatter.format(product.price),
                               style: TextStyle(
                                 decoration: TextDecoration.lineThrough,
                                 color: colorScheme.outline,
@@ -138,7 +138,7 @@ class ProductCard extends ConsumerWidget {
                               ),
                             ),
                           Text(
-                            MoneyFormatter.formatPaise(product.discountPriceInPaise),
+                            MoneyFormatter.format(product.discountPrice),
                             style: TextStyle(
                               color: colorScheme.primary,
                               fontWeight: FontWeight.w800,

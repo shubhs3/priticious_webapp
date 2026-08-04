@@ -165,7 +165,7 @@ class _Details extends ConsumerWidget {
         Text(product.description),
         const SizedBox(height: 16),
         Text(
-          MoneyFormatter.formatPaise(weight.discountPriceInPaise),
+          MoneyFormatter.format(weight.discountPrice),
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 16),

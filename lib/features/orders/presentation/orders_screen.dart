@@ -166,7 +166,7 @@ class _OrderCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          MoneyFormatter.formatPaise(item.unitPriceInPaise * item.quantity),
+                          MoneyFormatter.format(item.unitPrice * item.quantity),
                           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                         ),
                       ],
@@ -222,19 +222,19 @@ class _OrderCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text('Subtotal: ${MoneyFormatter.formatPaise(order.subtotalInPaise)}', style: const TextStyle(fontSize: 12)),
+                          Text('Subtotal: ${MoneyFormatter.format(order.subtotal)}', style: const TextStyle(fontSize: 12)),
                           const SizedBox(height: 2),
                           Text(
-                            'Delivery: ${order.deliveryChargeInPaise == 0 ? "FREE" : MoneyFormatter.formatPaise(order.deliveryChargeInPaise)}',
+                            'Delivery: ${order.deliveryCharge == 0.0 ? "FREE" : MoneyFormatter.format(order.deliveryCharge)}',
                             style: TextStyle(
                               fontSize: 12,
-                              color: order.deliveryChargeInPaise == 0 ? Colors.green : null,
-                              fontWeight: order.deliveryChargeInPaise == 0 ? FontWeight.bold : null,
+                              color: order.deliveryCharge == 0.0 ? Colors.green : null,
+                              fontWeight: order.deliveryCharge == 0.0 ? FontWeight.bold : null,
                             ),
                           ),
                           const Divider(height: 12),
                           Text(
-                            MoneyFormatter.formatPaise(order.totalInPaise),
+                            MoneyFormatter.format(order.total),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,

@@ -106,7 +106,7 @@ class AdminProductsScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Category: ${product.categoryId}'),
-                        Text('Price: ${MoneyFormatter.formatPaise(product.priceInPaise)} | Stock: ${product.stock}'),
+                        Text('Price: ${MoneyFormatter.format(product.price)} | Stock: ${product.stock}'),
                       ],
                     ),
                     trailing: Row(
@@ -232,16 +232,16 @@ class AdminProductsScreen extends ConsumerWidget {
       sheetObject.appendRow([
         TextCellValue('Product ID'),
         TextCellValue('Product Name'),
-        TextCellValue('Price (Paise)'),
-        TextCellValue('Discount Price (Paise)'),
+        TextCellValue('Price (Rupees)'),
+        TextCellValue('Discount Price (Rupees)'),
       ]);
 
       for (final p in products) {
         sheetObject.appendRow([
           TextCellValue(p.id),
           TextCellValue(p.name),
-          IntCellValue(p.priceInPaise),
-          IntCellValue(p.discountPriceInPaise),
+          DoubleCellValue(p.price),
+          DoubleCellValue(p.discountPrice),
         ]);
       }
 
@@ -273,8 +273,8 @@ class AdminProductsScreen extends ConsumerWidget {
         TextCellValue('Name'),
         TextCellValue('Category Slug'),
         TextCellValue('Description'),
-        TextCellValue('Price (Paise)'),
-        TextCellValue('Discount Price (Paise)'),
+        TextCellValue('Price (Rupees)'),
+        TextCellValue('Discount Price (Rupees)'),
         TextCellValue('Stock'),
         TextCellValue('Storage Instructions'),
       ]);
@@ -284,8 +284,8 @@ class AdminProductsScreen extends ConsumerWidget {
         TextCellValue('Premium California Almonds'),
         TextCellValue('almonds'),
         TextCellValue('High quality California almonds, raw and crunchy.'),
-        IntCellValue(39900),
-        IntCellValue(34900),
+        DoubleCellValue(399.0),
+        DoubleCellValue(349.0),
         IntCellValue(100),
         TextCellValue('Store in a cool, dry place.'),
       ]);
@@ -339,14 +339,14 @@ class AdminProductsScreen extends ConsumerWidget {
           final priceVal = row[2]?.value;
           final discountVal = row[3]?.value;
 
-          final price = int.tryParse(priceVal?.toString() ?? '') ?? 0;
-          final discount = int.tryParse(discountVal?.toString() ?? '') ?? 0;
+          final price = double.tryParse(priceVal?.toString() ?? '') ?? 0.0;
+          final discount = double.tryParse(discountVal?.toString() ?? '') ?? 0.0;
 
-          if (price > 0 && discount > 0) {
+          if (price > 0.0 && discount > 0.0) {
             updates.add({
               'id': id,
-              'priceInPaise': price,
-              'discountPriceInPaise': discount,
+              'price': price,
+              'discountPrice': discount,
             });
           }
         }
@@ -417,8 +417,8 @@ class AdminProductsScreen extends ConsumerWidget {
           final stockVal = row[5]?.value;
           final storage = row[6]?.value?.toString().trim() ?? 'Cool and dry place.';
 
-          final price = int.tryParse(priceVal?.toString() ?? '') ?? 34900;
-          final discount = int.tryParse(discountVal?.toString() ?? '') ?? 29900;
+          final price = double.tryParse(priceVal?.toString() ?? '') ?? 349.0;
+          final discount = double.tryParse(discountVal?.toString() ?? '') ?? 299.0;
           final stock = int.tryParse(stockVal?.toString() ?? '') ?? 100;
 
           final id = const Uuid().v4();
@@ -430,11 +430,11 @@ class AdminProductsScreen extends ConsumerWidget {
               name: name,
               description: description,
               imageUrls: const [],
-              priceInPaise: price,
-              discountPriceInPaise: discount,
+              price: price,
+              discountPrice: discount,
               weightOptions: const [
-                ProductWeightOption(label: '250 g', grams: 250, priceInPaise: 39900, discountPriceInPaise: 34900),
-                ProductWeightOption(label: '500 g', grams: 500, priceInPaise: 74900, discountPriceInPaise: 64900),
+                ProductWeightOption(label: '250 g', grams: 250, price: 399.0, discountPrice: 349.0),
+                ProductWeightOption(label: '500 g', grams: 500, price: 749.0, discountPrice: 649.0),
               ],
               stock: stock,
               nutrition: const {'Energy': '500 kcal'},
@@ -501,8 +501,8 @@ class _ProductEditDialogState extends ConsumerState<_ProductEditDialog> {
     _nameController = TextEditingController(text: p?.name ?? '');
     _categoryController = TextEditingController(text: p?.categoryId ?? 'almonds');
     _descController = TextEditingController(text: p?.description ?? '');
-    _priceController = TextEditingController(text: p?.priceInPaise.toString() ?? '34900');
-    _discountController = TextEditingController(text: p?.discountPriceInPaise.toString() ?? '29900');
+    _priceController = TextEditingController(text: p?.price.toString() ?? '349.0');
+    _discountController = TextEditingController(text: p?.discountPrice.toString() ?? '299.0');
     _stockController = TextEditingController(text: p?.stock.toString() ?? '100');
     _storageController = TextEditingController(text: p?.storageInstructions ?? 'Cool and dry place.');
 
@@ -777,11 +777,11 @@ class _ProductEditDialogState extends ConsumerState<_ProductEditDialog> {
                     name: _nameController.text.trim(),
                     description: _descController.text.trim(),
                     imageUrls: _imageUrls,
-                    priceInPaise: int.tryParse(_priceController.text) ?? 34900,
-                    discountPriceInPaise: int.tryParse(_discountController.text) ?? 29900,
+                    price: double.tryParse(_priceController.text) ?? 349.0,
+                    discountPrice: double.tryParse(_discountController.text) ?? 299.0,
                     weightOptions: widget.product?.weightOptions ?? [
-                      const ProductWeightOption(label: '250 g', grams: 250, priceInPaise: 39900, discountPriceInPaise: 34900),
-                      const ProductWeightOption(label: '500 g', grams: 500, priceInPaise: 74900, discountPriceInPaise: 64900),
+                      const ProductWeightOption(label: '250 g', grams: 250, price: 399.0, discountPrice: 349.0),
+                      const ProductWeightOption(label: '500 g', grams: 500, price: 749.0, discountPrice: 649.0),
                     ],
                     stock: int.tryParse(_stockController.text) ?? 100,
                     nutrition: widget.product?.nutrition ?? {'Energy': '500 kcal'},

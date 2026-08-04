@@ -11,8 +11,8 @@ abstract class ProductModel with _$ProductModel {
     required String name,
     required String description,
     required List<String> imageUrls,
-    required int priceInPaise,
-    required int discountPriceInPaise,
+    required double price,
+    required double discountPrice,
     required List<ProductWeightOption> weightOptions,
     required int stock,
     required Map<String, String> nutrition,
@@ -36,8 +36,8 @@ abstract class ProductWeightOption with _$ProductWeightOption {
   const factory ProductWeightOption({
     required String label,
     required int grams,
-    required int priceInPaise,
-    required int discountPriceInPaise,
+    required double price,
+    required double discountPrice,
   }) = _ProductWeightOption;
 
   factory ProductWeightOption.fromJson(Map<String, dynamic> json) =>

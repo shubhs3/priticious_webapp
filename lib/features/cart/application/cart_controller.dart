@@ -11,23 +11,23 @@ final cartControllerProvider =
 
 final cartSummaryProvider = Provider<CartSummaryModel>((ref) {
   final items = ref.watch(cartControllerProvider);
-  final subtotal = items.fold<int>(
-    0,
-    (total, item) => total + item.unitPriceInPaise * item.quantity,
+  final subtotal = items.fold<double>(
+    0.0,
+    (total, item) => total + item.unitPrice * item.quantity,
   );
   final delivery =
       !AppConstants.enableDeliveryCharges ||
-      subtotal >= AppConstants.freeDeliveryThresholdInPaise ||
-      subtotal == 0
-      ? 0
-      : AppConstants.standardDeliveryChargeInPaise;
+      subtotal >= AppConstants.freeDeliveryThreshold ||
+      subtotal == 0.0
+      ? 0.0
+      : AppConstants.standardDeliveryCharge;
 
   return CartSummaryModel(
     items: items,
-    subtotalInPaise: subtotal,
-    discountInPaise: 0,
-    deliveryChargeInPaise: delivery,
-    totalInPaise: subtotal + delivery,
+    subtotal: subtotal,
+    discount: 0.0,
+    deliveryCharge: delivery,
+    total: subtotal + delivery,
   );
 });
 
@@ -47,7 +47,7 @@ class CartController extends StateNotifier<List<CartItemModel>> {
           name: product.name,
           imageUrl: product.imageUrls.firstOrNull ?? '',
           weightOption: weightOption,
-          unitPriceInPaise: weightOption.discountPriceInPaise,
+          unitPrice: weightOption.discountPrice,
           quantity: 1,
         ),
       ];

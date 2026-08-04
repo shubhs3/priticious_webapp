@@ -192,7 +192,7 @@ class _CustomerDetailDialog extends ConsumerWidget {
                                         style: const TextStyle(fontWeight: FontWeight.bold),
                                       ),
                                       subtitle: Text(
-                                        'Placed: $placedDate\nTotal: ${MoneyFormatter.formatPaise(order.totalInPaise)}',
+                                        'Placed: $placedDate\nTotal: ${MoneyFormatter.format(order.total)}',
                                       ),
                                       trailing: Chip(
                                         label: Text(order.status.name.toUpperCase(), style: const TextStyle(fontSize: 10)),

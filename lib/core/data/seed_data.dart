@@ -51,20 +51,20 @@ const seedWeightOptions = <ProductWeightOption>[
   ProductWeightOption(
     label: '250 g',
     grams: 250,
-    priceInPaise: 39900,
-    discountPriceInPaise: 34900,
+    price: 399.0,
+    discountPrice: 349.0,
   ),
   ProductWeightOption(
     label: '500 g',
     grams: 500,
-    priceInPaise: 74900,
-    discountPriceInPaise: 64900,
+    price: 749.0,
+    discountPrice: 649.0,
   ),
   ProductWeightOption(
     label: '1 kg',
     grams: 1000,
-    priceInPaise: 139900,
-    discountPriceInPaise: 124900,
+    price: 1399.0,
+    discountPrice: 1249.0,
   ),
 ];
 
@@ -76,8 +76,8 @@ const sampleProducts = <ProductModel>[
     description:
         'Crunchy whole almonds selected for daily nutrition and clean snacking.',
     imageUrls: ['https://images.unsplash.com/photo-1508061253366-f7da158b6d96?q=80&w=400'],
-    priceInPaise: 39900,
-    discountPriceInPaise: 34900,
+    price: 399.0,
+    discountPrice: 349.0,
     weightOptions: seedWeightOptions,
     stock: 120,
     nutrition: {'Protein': '21g', 'Fiber': '12g', 'Energy': '579 kcal'},
@@ -94,8 +94,8 @@ const sampleProducts = <ProductModel>[
     description:
         'Creamy W320 cashews for sweets, curries, and mindful snacking.',
     imageUrls: ['https://images.unsplash.com/photo-1600189020840-e9db18c3258a?q=80&w=400'],
-    priceInPaise: 44900,
-    discountPriceInPaise: 39900,
+    price: 449.0,
+    discountPrice: 399.0,
     weightOptions: seedWeightOptions,
     stock: 80,
     nutrition: {'Protein': '18g', 'Iron': '6.7mg', 'Energy': '553 kcal'},
@@ -112,8 +112,8 @@ const sampleProducts = <ProductModel>[
     description:
         'Jumbo pistachios roasted in small batches with balanced sea salt.',
     imageUrls: ['https://images.unsplash.com/photo-1543158087-0b1a039757f5?q=80&w=400'],
-    priceInPaise: 49900,
-    discountPriceInPaise: 44900,
+    price: 499.0,
+    discountPrice: 449.0,
     weightOptions: seedWeightOptions,
     stock: 64,
     nutrition: {'Protein': '20g', 'Potassium': '1025mg', 'Energy': '562 kcal'},
@@ -129,8 +129,8 @@ const sampleProducts = <ProductModel>[
     description:
         'A balanced mix of pumpkin, sunflower, flax, chia, and melon seeds.',
     imageUrls: ['https://images.unsplash.com/photo-1623428187969-5da2d87e0af9?q=80&w=400'],
-    priceInPaise: 29900,
-    discountPriceInPaise: 24900,
+    price: 299.0,
+    discountPrice: 249.0,
     weightOptions: seedWeightOptions,
     stock: 150,
     nutrition: {'Omega-3': 'Rich', 'Fiber': 'High', 'Protein': '18g'},
@@ -148,8 +148,8 @@ const sampleProducts = <ProductModel>[
 ];
 
 const sampleSettings = <String, dynamic>{
-  'deliveryChargeInPaise': 4900,
-  'freeDeliveryThresholdInPaise': 99900,
+  'deliveryCharge': 49.0,
+  'freeDeliveryThreshold': 999.0,
   'supportEmail': 'support@priticious.com',
   'supportPhone': '9999909122',
   'storeName': 'PRITICIOUS DRY FRUITS',

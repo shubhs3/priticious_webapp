@@ -29,7 +29,7 @@ class AdminSalesScreen extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text('Error loading stats: $error')),
           data: (stats) {
-            final revenue = stats['totalRevenueInPaise'] as int? ?? 0;
+            final revenue = (stats['totalRevenue'] as num?)?.toDouble() ?? 0.0;
             final productCount = stats['productCount'] as int? ?? 0;
             final lowStockCount = stats['lowStockCount'] as int? ?? 0;
             final totalOrders = stats['totalOrders'] as int? ?? 0;
@@ -49,7 +49,7 @@ class AdminSalesScreen extends ConsumerWidget {
                   children: [
                     _StatCard(
                       title: 'Total Revenue',
-                      value: MoneyFormatter.formatPaise(revenue),
+                      value: MoneyFormatter.format(revenue),
                       icon: Icons.attach_money,
                       color: Colors.green,
                     ),
