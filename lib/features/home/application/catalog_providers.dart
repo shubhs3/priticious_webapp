@@ -69,26 +69,36 @@ final featuredProductsProvider = Provider<AsyncValue<List<ProductModel>>>((
   ref,
 ) {
   final products = ref.watch(productsProvider);
-  return products.whenData(
-    (items) => items.where((item) => item.isFeatured).toList(),
-  );
+  return products.whenData((items) {
+    if (items.isEmpty) return const [];
+    final featured = items.where((item) => item.isFeatured).toList();
+    if (featured.isNotEmpty) return featured;
+    return items.take(8).toList();
+  });
 });
 
 final bestSellerProductsProvider = Provider<AsyncValue<List<ProductModel>>>((
   ref,
 ) {
   final products = ref.watch(productsProvider);
-  return products.whenData(
-    (items) => items.where((item) => item.isBestSeller).toList(),
-  );
+  return products.whenData((items) {
+    if (items.isEmpty) return const [];
+    final best = items.where((item) => item.isBestSeller).toList();
+    if (best.isNotEmpty) return best;
+    return items.length > 4 ? items.skip(2).take(8).toList() : items.take(8).toList();
+  });
 });
 
 final newArrivalProductsProvider = Provider<AsyncValue<List<ProductModel>>>((
   ref,
 ) {
   final products = ref.watch(productsProvider);
-  return products.whenData(
-    (items) => items.where((item) => item.isNewArrival).toList(),
-  );
+  return products.whenData((items) {
+    if (items.isEmpty) return const [];
+    final newItems =
+        items.where((item) => item.isNewArrival || item.isRecentlyAdded).toList();
+    if (newItems.isNotEmpty) return newItems;
+    return items.reversed.take(8).toList();
+  });
 });
 

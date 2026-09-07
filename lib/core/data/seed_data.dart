@@ -3,30 +3,95 @@ import '../models/category_model.dart';
 import '../models/product_model.dart';
 
 const sampleCategories = <CategoryModel>[
-  CategoryModel(id: 'almonds', name: 'Almonds', slug: 'almonds', imageUrl: ''),
-  CategoryModel(id: 'cashews', name: 'Cashews', slug: 'cashews', imageUrl: ''),
+  CategoryModel(
+    id: 'almonds',
+    name: 'Almonds',
+    slug: 'almonds',
+    imageUrl: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d96?q=80&w=400',
+  ),
+  CategoryModel(
+    id: 'cashews',
+    name: 'Cashews',
+    slug: 'cashews',
+    imageUrl: 'https://images.unsplash.com/photo-1600189020840-e9db18c3258a?q=80&w=400',
+  ),
   CategoryModel(
     id: 'pistachios',
     name: 'Pistachios',
     slug: 'pistachios',
-    imageUrl: '',
+    imageUrl: 'https://images.unsplash.com/photo-1596568359553-a56de6970068?q=80&w=400',
   ),
-  CategoryModel(id: 'walnuts', name: 'Walnuts', slug: 'walnuts', imageUrl: ''),
-  CategoryModel(id: 'raisins', name: 'Raisins', slug: 'raisins', imageUrl: ''),
-  CategoryModel(id: 'dates', name: 'Dates', slug: 'dates', imageUrl: ''),
+  CategoryModel(
+    id: 'walnuts',
+    name: 'Walnuts',
+    slug: 'walnuts',
+    imageUrl: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=400',
+  ),
+  CategoryModel(
+    id: 'raisins',
+    name: 'Raisins',
+    slug: 'raisins',
+    imageUrl: 'https://images.unsplash.com/photo-1595412433290-7d72cb83a42d?q=80&w=400',
+  ),
+  CategoryModel(
+    id: 'dates',
+    name: 'Dates & Chuhara',
+    slug: 'dates',
+    imageUrl: 'https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?q=80&w=400',
+  ),
+  CategoryModel(
+    id: 'makhana',
+    name: 'Makhana',
+    slug: 'makhana',
+    imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=400',
+  ),
+  CategoryModel(
+    id: 'anjeer',
+    name: 'Figs & Anjeer',
+    slug: 'anjeer',
+    imageUrl: 'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?q=80&w=400',
+  ),
+  CategoryModel(
+    id: 'seeds',
+    name: 'Healthy Seeds',
+    slug: 'seeds',
+    imageUrl: 'https://images.unsplash.com/photo-1546548970-71785318a17b?q=80&w=400',
+  ),
+  CategoryModel(
+    id: 'spices',
+    name: 'Spices & Herbs',
+    slug: 'spices',
+    imageUrl: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=400',
+  ),
+  CategoryModel(
+    id: 'berries',
+    name: 'Dry Berries',
+    slug: 'berries',
+    imageUrl: 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?q=80&w=400',
+  ),
   CategoryModel(
     id: 'mixed-nuts',
     name: 'Mixed Nuts',
     slug: 'mixed-nuts',
-    imageUrl: '',
+    imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=400',
   ),
-  CategoryModel(id: 'seeds', name: 'Seeds', slug: 'seeds', imageUrl: ''),
-  CategoryModel(id: 'spices', name: 'Spices', slug: 'spices', imageUrl: ''),
   CategoryModel(
-    id: 'gift-packs',
-    name: 'Gift Packs',
-    slug: 'gift-packs',
-    imageUrl: '',
+    id: 'ayurvedic',
+    name: 'Ayurvedic',
+    slug: 'ayurvedic',
+    imageUrl: 'https://images.unsplash.com/photo-1514733670139-4d87a1941d55?q=80&w=400',
+  ),
+  CategoryModel(
+    id: 'gola',
+    name: 'Coconut & Gola',
+    slug: 'gola',
+    imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=400',
+  ),
+  CategoryModel(
+    id: 'gulkand',
+    name: 'Gulkand & Sweets',
+    slug: 'gulkand',
+    imageUrl: 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=400',
   ),
 ];
 

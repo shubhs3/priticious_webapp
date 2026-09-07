@@ -10,6 +10,8 @@ import '../../../shared/widgets/responsive_page.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../application/catalog_providers.dart';
 
+import '../../search/application/search_controller.dart';
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -20,6 +22,7 @@ class HomeScreen extends ConsumerWidget {
     final featured = ref.watch(featuredProductsProvider);
     final bestSellers = ref.watch(bestSellerProductsProvider);
     final newArrivals = ref.watch(newArrivalProductsProvider);
+    final allProducts = ref.watch(productsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -32,7 +35,10 @@ class HomeScreen extends ConsumerWidget {
             children: [
               SearchAnchor.bar(
                 barHintText: 'Search nuts, seeds, dates...',
-                onSubmitted: (query) => context.go('/search'),
+                onSubmitted: (query) {
+                  ref.read(searchQueryProvider.notifier).state = query;
+                  context.go('/search');
+                },
                 suggestionsBuilder: (context, controller) => const [],
               ),
               const SizedBox(height: 18),
@@ -60,7 +66,10 @@ class HomeScreen extends ConsumerWidget {
                       ActionChip(
                         avatar: const Icon(Icons.spa_outlined, size: 18),
                         label: Text(category.name),
-                        onPressed: () => context.go('/search'),
+                        onPressed: () {
+                          ref.read(selectedCategoryFilterProvider.notifier).state = category.id;
+                          context.go('/search');
+                        },
                       ),
                   ],
                 ),
@@ -82,6 +91,11 @@ class HomeScreen extends ConsumerWidget {
               _ProductSection(
                 title: 'New Arrivals',
                 products: newArrivals,
+                onAdd: (product) => _addToCart(context, ref, product),
+              ),
+              _ProductSection(
+                title: 'All Products',
+                products: allProducts,
                 onAdd: (product) => _addToCart(context, ref, product),
               ),
             ],

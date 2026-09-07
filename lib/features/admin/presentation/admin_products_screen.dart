@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../core/data/seed_data.dart';
 import '../../../core/models/product_model.dart';
 import '../../../core/utils/file_saver.dart';
 import '../../../core/utils/money_formatter.dart';
@@ -68,6 +69,17 @@ class AdminProductsScreen extends ConsumerWidget {
                     Icon(Icons.upload_file, size: 20),
                     SizedBox(width: 8),
                     Text('Upload New Products'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'enrich_products',
+                child: Row(
+                  children: [
+                    Icon(Icons.auto_fix_high, size: 20, color: Colors.amber),
+                    SizedBox(width: 8),
+                    Text('Enrich Products & Badges'),
                   ],
                 ),
               ),
@@ -214,6 +226,9 @@ class AdminProductsScreen extends ConsumerWidget {
       case 'upload_product':
         _uploadNewProducts(context, ref);
         break;
+      case 'enrich_products':
+        _autoEnrichProducts(context, ref);
+        break;
     }
   }
 
@@ -304,14 +319,69 @@ class AdminProductsScreen extends ConsumerWidget {
     }
   }
 
+  String _getCellValue(List<Data?> row, int index) {
+    if (index < 0 || index >= row.length) return '';
+    final cell = row[index];
+    if (cell == null || cell.value == null) return '';
+    final val = cell.value;
+    if (val is TextCellValue) {
+      return (val.value.text ?? val.value.toString()).trim();
+    }
+    return val.toString().trim();
+  }
+
+  double _getCellDouble(List<Data?> row, int index, double defaultValue) {
+    if (index < 0 || index >= row.length) return defaultValue;
+    final cell = row[index];
+    if (cell == null || cell.value == null) return defaultValue;
+    final val = cell.value;
+    if (val is DoubleCellValue) return val.value;
+    if (val is IntCellValue) return val.value.toDouble();
+    if (val is TextCellValue) {
+      final text = val.value.text ?? val.value.toString();
+      final str = text.replaceAll(RegExp(r'[^0-9.]'), '');
+      return double.tryParse(str) ?? defaultValue;
+    }
+    final str = val.toString().replaceAll(RegExp(r'[^0-9.]'), '');
+    return double.tryParse(str) ?? defaultValue;
+  }
+
+  int _getCellInt(List<Data?> row, int index, int defaultValue) {
+    if (index < 0 || index >= row.length) return defaultValue;
+    final cell = row[index];
+    if (cell == null || cell.value == null) return defaultValue;
+    final val = cell.value;
+    if (val is IntCellValue) return val.value;
+    if (val is DoubleCellValue) return val.value.toInt();
+    if (val is TextCellValue) {
+      final text = val.value.text ?? val.value.toString();
+      final str = text.replaceAll(RegExp(r'[^0-9]'), '');
+      return int.tryParse(str) ?? defaultValue;
+    }
+    final str = val.toString().replaceAll(RegExp(r'[^0-9]'), '');
+    return int.tryParse(str) ?? defaultValue;
+  }
+
   void _uploadPriceUpdates(BuildContext context, WidgetRef ref) async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['xlsx'],
+        withData: true,
       );
 
-      if (result == null || result.files.single.bytes == null) {
+      if (result == null || result.files.isEmpty) {
+        return;
+      }
+
+      final file = result.files.single;
+      final bytes = file.bytes;
+      if (bytes == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to read Excel file data.')),
+          );
+        }
         return;
       }
 
@@ -321,7 +391,6 @@ class AdminProductsScreen extends ConsumerWidget {
         );
       }
 
-      final bytes = result.files.single.bytes!;
       final excel = Excel.decodeBytes(bytes);
       final updates = <Map<String, dynamic>>[];
 
@@ -331,16 +400,13 @@ class AdminProductsScreen extends ConsumerWidget {
 
         for (int i = 1; i < sheet.maxRows; i++) {
           final row = sheet.rows[i];
-          if (row.isEmpty || row[0] == null) continue;
+          if (row.isEmpty) continue;
 
-          final id = row[0]?.value?.toString().trim();
-          if (id == null || id.isEmpty) continue;
+          final id = _getCellValue(row, 0);
+          if (id.isEmpty || id.toLowerCase() == 'product id') continue;
 
-          final priceVal = row[2]?.value;
-          final discountVal = row[3]?.value;
-
-          final price = double.tryParse(priceVal?.toString() ?? '') ?? 0.0;
-          final discount = double.tryParse(discountVal?.toString() ?? '') ?? 0.0;
+          final price = _getCellDouble(row, 2, 0.0);
+          final discount = _getCellDouble(row, 3, 0.0);
 
           if (price > 0.0 && discount > 0.0) {
             updates.add({
@@ -371,10 +437,52 @@ class AdminProductsScreen extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update prices: $e')),
+          SnackBar(content: Text('Failed to update prices: ${e.toString()}')),
         );
       }
     }
+  }
+
+  String _getDefaultProductImage(String categoryId, String name) {
+    final cat = categoryId.toLowerCase();
+    final n = name.toLowerCase();
+    if (cat.contains('almond') || n.contains('badam') || n.contains('almond')) {
+      return 'https://images.unsplash.com/photo-1508061253366-f7da158b6d96?q=80&w=400';
+    }
+    if (cat.contains('cashew') || n.contains('kaaju') || n.contains('cashew')) {
+      return 'https://images.unsplash.com/photo-1600189020840-e9db18c3258a?q=80&w=400';
+    }
+    if (cat.contains('pista') || n.contains('pista') || n.contains('pistachio')) {
+      return 'https://images.unsplash.com/photo-1596568359553-a56de6970068?q=80&w=400';
+    }
+    if (cat.contains('walnut') || n.contains('akhrot') || n.contains('walnut')) {
+      return 'https://images.unsplash.com/photo-1563245372-f21724e3856d?q=80&w=400';
+    }
+    if (cat.contains('raisin') || n.contains('kishmis') || n.contains('munakka') || n.contains('raisin')) {
+      return 'https://images.unsplash.com/photo-1595412433290-7d72cb83a42d?q=80&w=400';
+    }
+    if (cat.contains('date') || n.contains('khajoor') || n.contains('chuhara') || n.contains('date')) {
+      return 'https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?q=80&w=400';
+    }
+    if (cat.contains('makhana') || n.contains('makhana') || n.contains('makahana')) {
+      return 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=400';
+    }
+    if (cat.contains('anjeer') || n.contains('anjeer') || n.contains('fig')) {
+      return 'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?q=80&w=400';
+    }
+    if (cat.contains('seed') || n.contains('seed') || n.contains('til')) {
+      return 'https://images.unsplash.com/photo-1546548970-71785318a17b?q=80&w=400';
+    }
+    if (cat.contains('spice') || n.contains('mirch') || n.contains('elaichi') || n.contains('masala') || n.contains('dhaniya') || n.contains('cinnamon')) {
+      return 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=400';
+    }
+    if (cat.contains('berry') || n.contains('blueberry') || n.contains('cranberry')) {
+      return 'https://images.unsplash.com/photo-1498557850523-fd3d118b962e?q=80&w=400';
+    }
+    if (cat.contains('ayurvedic') || n.contains('chaal') || n.contains('fitkari')) {
+      return 'https://images.unsplash.com/photo-1514733670139-4d87a1941d55?q=80&w=400';
+    }
+    return 'https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=400';
   }
 
   void _uploadNewProducts(BuildContext context, WidgetRef ref) async {
@@ -382,9 +490,21 @@ class AdminProductsScreen extends ConsumerWidget {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['xlsx'],
+        withData: true,
       );
 
-      if (result == null || result.files.single.bytes == null) {
+      if (result == null || result.files.isEmpty) {
+        return;
+      }
+
+      final file = result.files.single;
+      final bytes = file.bytes;
+      if (bytes == null) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to read Excel file data.')),
+          );
+        }
         return;
       }
 
@@ -394,7 +514,6 @@ class AdminProductsScreen extends ConsumerWidget {
         );
       }
 
-      final bytes = result.files.single.bytes!;
       final excel = Excel.decodeBytes(bytes);
       final newProducts = <ProductModel>[];
 
@@ -404,42 +523,63 @@ class AdminProductsScreen extends ConsumerWidget {
 
         for (int i = 1; i < sheet.maxRows; i++) {
           final row = sheet.rows[i];
-          if (row.isEmpty || row[0] == null) continue;
+          if (row.isEmpty) continue;
 
-          final name = row[0]?.value?.toString().trim() ?? '';
-          final categoryId = row[1]?.value?.toString().trim() ?? '';
-          final description = row[2]?.value?.toString().trim() ?? '';
-          
+          final name = _getCellValue(row, 0);
+          final categoryId = _getCellValue(row, 1);
+          final description = _getCellValue(row, 2);
+
           if (name.isEmpty || categoryId.isEmpty) continue;
+          if (name.toLowerCase() == 'name' || categoryId.toLowerCase() == 'category slug') continue;
 
-          final priceVal = row[3]?.value;
-          final discountVal = row[4]?.value;
-          final stockVal = row[5]?.value;
-          final storage = row[6]?.value?.toString().trim() ?? 'Cool and dry place.';
-
-          final price = double.tryParse(priceVal?.toString() ?? '') ?? 349.0;
-          final discount = double.tryParse(discountVal?.toString() ?? '') ?? 299.0;
-          final stock = int.tryParse(stockVal?.toString() ?? '') ?? 100;
+          final price = _getCellDouble(row, 3, 349.0);
+          final discount = _getCellDouble(row, 4, 299.0);
+          final stock = _getCellInt(row, 5, 100);
+          final storage = _getCellValue(row, 6).isNotEmpty
+              ? _getCellValue(row, 6)
+              : 'Cool and dry place.';
 
           final id = const Uuid().v4();
-          
+          final imgUrl = _getDefaultProductImage(categoryId, name);
+          final index = newProducts.length;
+
           newProducts.add(
             ProductModel(
               id: id,
               categoryId: categoryId,
               name: name,
               description: description,
-              imageUrls: const [],
+              imageUrls: [imgUrl],
               price: price,
               discountPrice: discount,
-              weightOptions: const [
-                ProductWeightOption(label: '250 g', grams: 250, price: 399.0, discountPrice: 349.0),
-                ProductWeightOption(label: '500 g', grams: 500, price: 749.0, discountPrice: 649.0),
+              weightOptions: [
+                ProductWeightOption(
+                  label: '250 g',
+                  grams: 250,
+                  price: discount,
+                  discountPrice: (discount * 0.9).roundToDouble(),
+                ),
+                ProductWeightOption(
+                  label: '500 g',
+                  grams: 500,
+                  price: (discount * 1.8).roundToDouble(),
+                  discountPrice: (discount * 1.6).roundToDouble(),
+                ),
+                ProductWeightOption(
+                  label: '1 kg',
+                  grams: 1000,
+                  price: (discount * 3.5).roundToDouble(),
+                  discountPrice: (discount * 3.1).roundToDouble(),
+                ),
               ],
               stock: stock,
-              nutrition: const {'Energy': '500 kcal'},
-              ingredients: const ['Pure ingredients'],
+              nutrition: const {'Protein': '15g', 'Fiber': '10g', 'Energy': '480 kcal'},
+              ingredients: [name],
               storageInstructions: storage,
+              isFeatured: (index % 3 == 0),
+              isBestSeller: (index % 2 == 0),
+              isNewArrival: (index % 4 == 0),
+              isRecentlyAdded: true,
               isActive: true,
             ),
           );
@@ -465,7 +605,76 @@ class AdminProductsScreen extends ConsumerWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to import products: $e')),
+          SnackBar(content: Text('Failed to import products: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  void _autoEnrichProducts(BuildContext context, WidgetRef ref) async {
+    try {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Enriching product images, badges & categories...')),
+        );
+      }
+
+      final products = await ref.read(adminProductsProvider.future);
+      final repo = ref.read(adminRepositoryProvider);
+
+      int count = 0;
+      for (int i = 0; i < products.length; i++) {
+        final p = products[i];
+        final defaultImg = _getDefaultProductImage(p.categoryId, p.name);
+        final hasImage = p.imageUrls.isNotEmpty && p.imageUrls.first.isNotEmpty;
+
+        final updated = p.copyWith(
+          imageUrls: hasImage ? p.imageUrls : [defaultImg],
+          isFeatured: (i % 3 == 0),
+          isBestSeller: (i % 2 == 0),
+          isNewArrival: (i % 4 == 0),
+          isRecentlyAdded: true,
+          weightOptions: p.weightOptions.isEmpty
+              ? [
+                  ProductWeightOption(
+                    label: '250 g',
+                    grams: 250,
+                    price: p.discountPrice,
+                    discountPrice: (p.discountPrice * 0.9).roundToDouble(),
+                  ),
+                  ProductWeightOption(
+                    label: '500 g',
+                    grams: 500,
+                    price: (p.discountPrice * 1.8).roundToDouble(),
+                    discountPrice: (p.discountPrice * 1.6).roundToDouble(),
+                  ),
+                  ProductWeightOption(
+                    label: '1 kg',
+                    grams: 1000,
+                    price: (p.discountPrice * 3.5).roundToDouble(),
+                    discountPrice: (p.discountPrice * 3.1).roundToDouble(),
+                  ),
+                ]
+              : p.weightOptions,
+        );
+
+        await repo.upsertProduct(updated);
+        count++;
+      }
+
+      for (final cat in sampleCategories) {
+        await repo.upsertCategory(cat);
+      }
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Enriched $count products and updated categories!')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to enrich products: $e')),
         );
       }
     }
