@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,77 +17,79 @@ class CartScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final summary = ref.watch(cartSummaryProvider);
+    final totalItemsCount = summary.items.fold<int>(0, (sum, i) => sum + i.quantity);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Cart')),
+      appBar: AppBar(
+        title: Text(
+          summary.items.isEmpty ? 'Cart' : 'Cart ($totalItemsCount)',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: false,
+        actions: [
+          if (summary.items.isNotEmpty)
+            IconButton(
+              tooltip: 'Clear Cart',
+              icon: const Icon(Icons.delete_outline_rounded),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Clear Shopping Cart?'),
+                    content: const Text('Are you sure you want to remove all items from your cart?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(foregroundColor: Colors.red),
+                        onPressed: () {
+                          ref.read(cartControllerProvider.notifier).clear();
+                          Navigator.of(ctx).pop();
+                        },
+                        child: const Text('Clear All'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+        ],
+      ),
       body: summary.items.isEmpty
-          ? const EmptyState(
+          ? EmptyState(
               title: 'Your cart is empty',
-              message: 'Add a few premium snacks and they will appear here.',
+              message: 'Explore our premium dry fruits, nuts & spices and add them to your cart.',
               icon: Icons.shopping_bag_outlined,
+              action: FilledButton.icon(
+                onPressed: () => context.go('/'),
+                icon: const Icon(Icons.storefront_outlined),
+                label: const Text('Browse Products'),
+              ),
             )
           : ResponsivePage(
+              maxWidth: 850,
               child: Column(
                 children: [
+                  // Free Shipping Progress Header
+                  if (AppConstants.enableDeliveryCharges)
+                    _FreeDeliveryProgressBar(subtotal: summary.subtotal),
+
                   Expanded(
                     child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       itemCount: summary.items.length,
-                      separatorBuilder: (context, index) => const Divider(),
+                      separatorBuilder: (context, index) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final item = summary.items[index];
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const CircleAvatar(
-                            child: Icon(Icons.spa_outlined),
-                          ),
-                          title: Text(item.name),
-                          subtitle: Text(
-                            '${item.weightOption.label} • ${MoneyFormatter.format(item.unitPrice)} x ${item.quantity} = ${MoneyFormatter.format(item.unitPrice * item.quantity)}',
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton.filledTonal(
-                                visualDensity: VisualDensity.compact,
-                                onPressed: () {
-                                  ref
-                                      .read(cartControllerProvider.notifier)
-                                      .updateQuantity(item, item.quantity - 1);
-                                },
-                                icon: const Icon(Icons.remove, size: 16),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                child: Text(
-                                  '${item.quantity}',
-                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ),
-                              IconButton.filled(
-                                visualDensity: VisualDensity.compact,
-                                onPressed: () {
-                                  ref
-                                      .read(cartControllerProvider.notifier)
-                                      .updateQuantity(item, item.quantity + 1);
-                                },
-                                icon: const Icon(Icons.add, size: 16),
-                              ),
-                            ],
-                          ),
-                        );
+                        return _ModernCartItemCard(item: item);
                       },
                     ),
                   ),
-                  _PriceBreakdown(summary: summary),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () => context.go('/checkout'),
-                      child: const Text('Checkout with COD'),
-                    ),
-                  ),
+
+                  // Bottom Summary Card
+                  _PriceBreakdownCard(summary: summary),
                 ],
               ),
             ),
@@ -93,72 +97,71 @@ class CartScreen extends ConsumerWidget {
   }
 }
 
-class _PriceBreakdown extends StatelessWidget {
-  const _PriceBreakdown({required this.summary});
+/// Header widget showing progress towards Free Delivery
+class _FreeDeliveryProgressBar extends StatelessWidget {
+  const _FreeDeliveryProgressBar({required this.subtotal});
 
-  final CartSummaryModel summary;
+  final double subtotal;
 
   @override
   Widget build(BuildContext context) {
-    final totalItems = summary.items.fold<int>(0, (sum, i) => sum + i.quantity);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _row('Subtotal ($totalItems items)', summary.subtotal),
-            _row('Delivery', summary.deliveryCharge),
-            if (AppConstants.enableDeliveryCharges) ...[
-              if (summary.subtotal < AppConstants.freeDeliveryThreshold && summary.subtotal > 0.0) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'Add ${MoneyFormatter.format(AppConstants.freeDeliveryThreshold - summary.subtotal)} more for FREE delivery!',
+    final threshold = AppConstants.freeDeliveryThreshold;
+    final isFree = subtotal >= threshold;
+    final remaining = (threshold - subtotal).clamp(0.0, threshold);
+    final progress = (subtotal / threshold).clamp(0.0, 1.0);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isFree
+            ? Colors.green.withAlpha(20)
+            : colorScheme.primaryContainer.withAlpha(50),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isFree
+              ? Colors.green.withAlpha(80)
+              : colorScheme.primary.withAlpha(50),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                isFree ? Icons.stars_rounded : Icons.local_shipping_outlined,
+                color: isFree ? Colors.green[700] : colorScheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  isFree
+                      ? '🎉 You unlocked FREE Delivery!'
+                      : 'Add ${MoneyFormatter.format(remaining)} more for FREE Delivery!',
                   style: TextStyle(
-                    color: Colors.orange[800],
                     fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                    fontSize: 13,
+                    color: isFree ? Colors.green[800] : colorScheme.onSurface,
                   ),
-                ),
-              ] else if (summary.subtotal >= AppConstants.freeDeliveryThreshold) ...[
-                const SizedBox(height: 8),
-                const Text(
-                  '🎉 You qualify for FREE delivery!',
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ] else if (summary.subtotal > 0.0) ...[
-              const SizedBox(height: 8),
-              const Text(
-                '🎉 Free delivery on all orders!',
-                style: TextStyle(
-                  color: Colors.green,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
                 ),
               ),
             ],
-            const Divider(height: 24),
-            _row('Total', summary.total, bold: true),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _row(String label, double amount, {bool bold = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(child: Text(label)),
-          Text(
-            MoneyFormatter.format(amount),
-            style: TextStyle(
-              fontWeight: bold ? FontWeight.w800 : FontWeight.w500,
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: isFree
+                  ? Colors.green.withAlpha(40)
+                  : colorScheme.primary.withAlpha(30),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                isFree ? Colors.green : colorScheme.primary,
+              ),
             ),
           ),
         ],
@@ -166,3 +169,338 @@ class _PriceBreakdown extends StatelessWidget {
     );
   }
 }
+
+/// Modern Card displaying a single Cart Item with Small Thumbnail
+class _ModernCartItemCard extends ConsumerWidget {
+  const _ModernCartItemCard({required this.item});
+
+  final CartItemModel item;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final itemTotal = item.unitPrice * item.quantity;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withAlpha(100),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(10),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Small Product Image Thumbnail
+          _CartItemImageThumbnail(imageUrl: item.imageUrl),
+          const SizedBox(width: 14),
+
+          // Details: Title, Weight Badge, Unit & Total Price
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    // Weight Pill Chip
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: colorScheme.primaryContainer.withAlpha(80),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        item.weightOption.label,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${MoneyFormatter.format(item.unitPrice)} each',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colorScheme.outline,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  MoneyFormatter.format(itemTotal),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(width: 8),
+
+          // Quantity Stepper Controls (- / +)
+          Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest.withAlpha(100),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.all(4),
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  onPressed: () {
+                    ref
+                        .read(cartControllerProvider.notifier)
+                        .updateQuantity(item, item.quantity - 1);
+                  },
+                  icon: Icon(
+                    item.quantity == 1
+                        ? Icons.delete_outline_rounded
+                        : Icons.remove_rounded,
+                    size: 18,
+                    color: item.quantity == 1 ? Colors.red : colorScheme.onSurface,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Text(
+                    '${item.quantity}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.all(4),
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  onPressed: () {
+                    ref
+                        .read(cartControllerProvider.notifier)
+                        .updateQuantity(item, item.quantity + 1);
+                  },
+                  icon: Icon(
+                    Icons.add_rounded,
+                    size: 18,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Small rounded product thumbnail helper widget
+class _CartItemImageThumbnail extends StatelessWidget {
+  const _CartItemImageThumbnail({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withAlpha(80),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withAlpha(60),
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(11),
+        child: imageUrl.isEmpty
+            ? Center(
+                child: Icon(
+                  Icons.spa_outlined,
+                  color: colorScheme.primary,
+                  size: 32,
+                ),
+              )
+            : (imageUrl.startsWith('data:image/')
+                ? Image.memory(
+                    base64Decode(imageUrl.split(';base64,').last),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      Icons.image_not_supported_outlined,
+                      color: colorScheme.outline,
+                    ),
+                  )
+                : CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Center(
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Icon(
+                      Icons.image_not_supported_outlined,
+                      color: colorScheme.outline,
+                      size: 24,
+                    ),
+                  )),
+      ),
+    );
+  }
+}
+
+/// Bottom price breakdown card with checkout button
+class _PriceBreakdownCard extends StatelessWidget {
+  const _PriceBreakdownCard({required this.summary});
+
+  final CartSummaryModel summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final totalItems = summary.items.fold<int>(0, (sum, i) => sum + i.quantity);
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(20),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _row(context, 'Subtotal ($totalItems items)', summary.subtotal),
+            const SizedBox(height: 6),
+            _row(
+              context,
+              'Delivery Charge',
+              summary.deliveryCharge,
+              isDelivery: true,
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Divider(height: 1),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Total Amount',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      MoneyFormatter.format(summary.total),
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => context.go('/checkout'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  icon: const Text(
+                    'Checkout',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  label: const Icon(Icons.arrow_forward_rounded, size: 20),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _row(BuildContext context, String label, double amount, {bool isDelivery = false}) {
+    final isFree = isDelivery && amount == 0.0;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 14,
+          ),
+        ),
+        Text(
+          isFree ? 'FREE' : MoneyFormatter.format(amount),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            color: isFree ? Colors.green[700] : null,
+          ),
+        ),
+      ],
+    );
+  }
+}
+

@@ -16,6 +16,11 @@ import '../../features/products/presentation/product_detail_screen.dart';
 import '../../features/products/presentation/product_listing_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
+import '../../features/info/presentation/about_us_screen.dart';
+import '../../features/info/presentation/bulk_order_screen.dart';
+import '../../features/info/presentation/locations_screen.dart';
+import '../../features/info/presentation/contact_us_screen.dart';
+
 
 import '../../features/admin/presentation/admin_products_screen.dart';
 import '../../features/admin/presentation/admin_categories_screen.dart';
@@ -27,7 +32,7 @@ import '../../features/admin/presentation/admin_notifications_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/splash',
+    initialLocation: '/',
     routes: [
       GoRoute(
         path: '/splash',
@@ -64,6 +69,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            path: '/about-us',
+            builder: (context, state) => const AboutUsScreen(),
+          ),
+          GoRoute(
+            path: '/bulk-order',
+            builder: (context, state) => const BulkOrderScreen(),
+          ),
+          GoRoute(
+            path: '/locations',
+            builder: (context, state) => const LocationsScreen(),
+          ),
+          GoRoute(
+            path: '/contact-us',
+            builder: (context, state) => const ContactUsScreen(),
           ),
         ],
       ),
@@ -128,35 +149,44 @@ class CustomerShell extends ConsumerWidget {
     }
 
     final location = GoRouterState.of(context).uri.path;
+    final isDesktop = MediaQuery.of(context).size.width >= 768;
+
     return Scaffold(
-      body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _indexFor(location),
-        onDestinationSelected: (index) => context.go(_routeFor(index)),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
-          NavigationDestination(
-            icon: Icon(Icons.shopping_bag_outlined),
-            selectedIcon: Icon(Icons.shopping_bag),
-            label: 'Cart',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
-            label: 'Orders',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+      body: Column(
+        children: [
+          if (isDesktop) _TopWebHeader(location: location),
+          Expanded(child: child),
         ],
       ),
+      bottomNavigationBar: isDesktop
+          ? null
+          : NavigationBar(
+              selectedIndex: _indexFor(location),
+              onDestinationSelected: (index) => context.go(_routeFor(index)),
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home),
+                  label: 'Home',
+                ),
+                NavigationDestination(icon: Icon(Icons.search), label: 'Search'),
+                NavigationDestination(
+                  icon: Icon(Icons.shopping_bag_outlined),
+                  selectedIcon: Icon(Icons.shopping_bag),
+                  label: 'Cart',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.receipt_long_outlined),
+                  selectedIcon: Icon(Icons.receipt_long),
+                  label: 'Orders',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(Icons.person),
+                  label: 'Profile',
+                ),
+              ],
+            ),
     );
   }
 
@@ -178,3 +208,157 @@ class CustomerShell extends ConsumerWidget {
     };
   }
 }
+
+/// Full Desktop Web Navigation Bar (Dry Fruit House Style)
+class _TopWebHeader extends StatelessWidget {
+  const _TopWebHeader({required this.location});
+
+  final String location;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Topbar Announcement Bar (Royal Gold)
+          Container(
+            color: const Color(0xFFC59B27),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Priticious Dry Fruits - Eat Healthy (Nuts & Dry Fruits, Seeds, Dates, Berries and more!)',
+                  style: TextStyle(color: Color(0xFF2C1E00), fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                Row(
+                  children: const [
+                    Icon(Icons.phone, size: 14, color: Color(0xFF4A3700)),
+                    SizedBox(width: 6),
+                    Text('+91-7483600212 / 9364896022', style: TextStyle(color: Color(0xFF2C1E00), fontSize: 12, fontWeight: FontWeight.bold)),
+                    SizedBox(width: 20),
+                    Icon(Icons.email_outlined, size: 14, color: Color(0xFF4A3700)),
+                    SizedBox(width: 6),
+                    Text('info@priticious.com', style: TextStyle(color: Color(0xFF2C1E00), fontSize: 12, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Main Header Nav Bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            child: Row(
+              children: [
+                // Brand Logo
+                InkWell(
+                  onTap: () => context.go('/'),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFC59B27),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.spa_rounded, color: Colors.white, size: 24),
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'PRITICIOUS',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2,
+                              color: Color(0xFF4A3700),
+                            ),
+                          ),
+                          Text(
+                            'PREMIUM DRY FRUITS & SPICES',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                              color: Color(0xFFC59B27),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const Spacer(),
+
+                // Center Navigation Items
+                _navButton(context, 'HOME', '/', location == '/'),
+                _navButton(context, 'ABOUT US', '/about-us', location == '/about-us'),
+                _navButton(context, 'SHOP', '/products', location.startsWith('/products')),
+                _navButton(context, 'BULK ORDER', '/bulk-order', location == '/bulk-order'),
+                _navButton(context, 'LOCATIONS', '/locations', location == '/locations'),
+                _navButton(context, 'CONTACT US', '/contact-us', location == '/contact-us'),
+
+                const Spacer(),
+
+                // Action Icons
+                IconButton(
+                  icon: const Icon(Icons.search, color: Color(0xFF4A3700)),
+                  onPressed: () => context.go('/search'),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.person_outline, color: Color(0xFF4A3700)),
+                  onPressed: () => context.go('/profile'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => context.go('/cart'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFC59B27),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  ),
+                  icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+                  label: const Text('CART', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _navButton(BuildContext context, String label, String path, bool isActive) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: TextButton(
+        onPressed: () => context.go(path),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isActive ? const Color(0xFFC59B27) : const Color(0xFF4A3700),
+            fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
+            fontSize: 13,
+            decoration: isActive ? TextDecoration.underline : TextDecoration.none,
+            decorationColor: const Color(0xFFC59B27),
+            decorationThickness: 2,
+          ),
+        ),
+      ),
+    );
+  }
+}
+

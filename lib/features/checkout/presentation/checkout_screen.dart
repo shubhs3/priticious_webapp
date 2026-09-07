@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +11,7 @@ import '../../../core/utils/money_formatter.dart';
 import '../../../features/cart/application/cart_controller.dart';
 import '../../../shared/widgets/responsive_page.dart';
 import '../../home/application/catalog_providers.dart';
+
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
@@ -288,14 +291,59 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       const SizedBox(height: 12),
                       for (final item in summary.items)
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.symmetric(vertical: 6),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(80),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.outlineVariant.withAlpha(60),
+                                  ),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(7),
+                                  child: item.imageUrl.isEmpty
+                                      ? Icon(
+                                          Icons.spa_outlined,
+                                          size: 20,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        )
+                                      : (item.imageUrl.startsWith('data:image/')
+                                          ? Image.memory(
+                                              base64Decode(item.imageUrl.split(';base64,').last),
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, size: 16),
+                                            )
+                                          : CachedNetworkImage(
+                                              imageUrl: item.imageUrl,
+                                              fit: BoxFit.cover,
+                                              errorWidget: (context, url, error) => const Icon(Icons.image, size: 16),
+                                            )),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
                               Expanded(
-                                child: Text(
-                                  '${item.quantity} × ${item.name} (${item.weightOption.label})',
-                                  style: const TextStyle(fontSize: 15),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.name,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      '${item.weightOption.label} × ${item.quantity}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Theme.of(context).colorScheme.outline,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                               Text(
@@ -303,7 +351,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                   item.unitPrice * item.quantity,
                                 ),
                                 style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
                                 ),
                               ),
                             ],
