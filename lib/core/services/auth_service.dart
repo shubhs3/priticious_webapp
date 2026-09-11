@@ -31,7 +31,16 @@ final currentUserProvider = StreamProvider<UserModel?>((ref) async* {
   final firestore = ref.watch(firestoreProvider);
   await for (final snapshot in firestore.collection('users').doc(user.uid).snapshots()) {
     if (!snapshot.exists) {
-      yield null;
+      yield UserModel(
+        id: user.uid,
+        displayName: (user.displayName != null && user.displayName!.isNotEmpty)
+            ? user.displayName!
+            : 'Customer',
+        email: user.email ?? '',
+        phoneNumber: user.phoneNumber ?? '',
+        role: UserRole.customer,
+        isActive: true,
+      );
       continue;
     }
     yield UserModel.fromJson(docDataWithId(snapshot));

@@ -50,6 +50,20 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       final summary = ref.read(cartSummaryProvider);
       final customerId = ref.read(currentCustomerIdProvider);
       final isLoggedIn = customerId != guestCustomerId;
+
+      if (!isLoggedIn) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Login Required: Please sign in or register to place your order.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+          context.go('/login');
+        }
+        return;
+      }
+
       final uuid = const Uuid().v4();
 
       final address = AddressModel(
@@ -139,6 +153,70 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         }
       });
     });
+
+    if (!isLoggedIn) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Checkout')),
+        body: Center(
+          child: ResponsivePage(
+            maxWidth: 500,
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFFF6DF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.lock_outline_rounded,
+                      size: 48,
+                      color: Color(0xFFC59B27),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Login Required to Checkout',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF4A3700),
+                        ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Guest ordering is disabled. Please log in or create an account to complete your order and track your delivery in real-time.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.4),
+                  ),
+                  const SizedBox(height: 28),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => context.go('/login'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFC59B27),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.login_rounded),
+                      label: const Text(
+                        'Log In / Register Now',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Checkout')),

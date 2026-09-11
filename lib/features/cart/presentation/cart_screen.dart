@@ -9,6 +9,7 @@ import '../../../core/models/cart_model.dart';
 import '../../../core/utils/money_formatter.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/responsive_page.dart';
+import '../../home/application/catalog_providers.dart';
 import '../application/cart_controller.dart';
 
 class CartScreen extends ConsumerWidget {
@@ -386,13 +387,76 @@ class _CartItemImageThumbnail extends StatelessWidget {
 }
 
 /// Bottom price breakdown card with checkout button
-class _PriceBreakdownCard extends StatelessWidget {
+class _PriceBreakdownCard extends ConsumerWidget {
   const _PriceBreakdownCard({required this.summary});
 
   final CartSummaryModel summary;
 
+  void _handleCheckout(BuildContext context, WidgetRef ref) {
+    final isGuest = ref.read(currentCustomerIdProvider) == guestCustomerId;
+    if (isGuest) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFF6DF),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.lock_outline_rounded,
+                  color: Color(0xFFC59B27),
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'Login Required',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF4A3700),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: const Text(
+            'You must log in to place an order and track your delivery status. Please log in or create an account to proceed to checkout.',
+            style: TextStyle(fontSize: 14, height: 1.4),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFC59B27),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                context.go('/login');
+              },
+              child: const Text('Log In / Register'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      context.go('/checkout');
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final totalItems = summary.items.fold<int>(0, (sum, i) => sum + i.quantity);
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -452,7 +516,7 @@ class _PriceBreakdownCard extends StatelessWidget {
                   ],
                 ),
                 ElevatedButton.icon(
-                  onPressed: () => context.go('/checkout'),
+                  onPressed: () => _handleCheckout(context, ref),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.primary,
                     foregroundColor: colorScheme.onPrimary,

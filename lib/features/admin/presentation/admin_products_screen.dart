@@ -15,20 +15,55 @@ import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/responsive_page.dart';
 import '../application/admin_providers.dart';
 
-class AdminProductsScreen extends ConsumerWidget {
+class AdminProductsScreen extends ConsumerStatefulWidget {
   const AdminProductsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdminProductsScreen> createState() => _AdminProductsScreenState();
+}
+
+class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _selectedCategory = 'all';
+  String _stockFilter = 'all'; // 'all', 'in_stock', 'low_stock', 'out_of_stock'
+  String _sortBy = 'name_asc'; // 'name_asc', 'name_desc', 'price_asc', 'price_desc', 'stock_asc', 'stock_desc', 'newest'
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _clearFilters() {
+    setState(() {
+      _searchController.clear();
+      _searchQuery = '';
+      _selectedCategory = 'all';
+      _stockFilter = 'all';
+      _sortBy = 'name_asc';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final productsAsync = ref.watch(adminProductsProvider);
+    final categoriesAsync = ref.watch(adminCategoriesProvider);
+    final categories = categoriesAsync.valueOrNull ?? [];
+    final categoryMap = {for (final c in categories) c.id: c.name};
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Product Management'),
         actions: [
+          IconButton(
+            tooltip: 'Add Product',
+            icon: const Icon(Icons.add_circle_outline),
+            onPressed: () => _showProductDialog(context, ref),
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert),
-            tooltip: 'Excel Import/Export',
+            tooltip: 'Excel Import/Export & Tools',
             onSelected: (value) => _handleExcelAction(context, ref, value),
             itemBuilder: (context) => [
               const PopupMenuItem(
@@ -88,7 +123,7 @@ class AdminProductsScreen extends ConsumerWidget {
         ],
       ),
       body: ResponsivePage(
-        maxWidth: 960,
+        maxWidth: 1040,
         child: productsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => Center(child: Text('Error loading products: $error')),
@@ -101,49 +136,303 @@ class AdminProductsScreen extends ConsumerWidget {
               );
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                      child: const Icon(Icons.inventory_2_outlined),
-                    ),
-                    title: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Category: ${product.categoryId}'),
-                        Text('Price: ${MoneyFormatter.format(product.price)} | Stock: ${product.stock}'),
-                      ],
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          tooltip: 'Edit Stock',
-                          icon: const Icon(Icons.edit_road_outlined),
-                          onPressed: () => _showStockDialog(context, ref, product),
+            // Extract unique categories available from products or master category list
+            final availableCategories = <String>{};
+            for (final p in products) {
+              if (p.categoryId.isNotEmpty) {
+                availableCategories.add(p.categoryId);
+              }
+            }
+
+            // Filter logic
+            final filteredProducts = products.where((product) {
+              // 1. Search query
+              if (_searchQuery.isNotEmpty) {
+                final q = _searchQuery.toLowerCase();
+                final catName = categoryMap[product.categoryId] ?? product.categoryId;
+                final matchName = product.name.toLowerCase().contains(q);
+                final matchCat = catName.toLowerCase().contains(q) || product.categoryId.toLowerCase().contains(q);
+                final matchDesc = product.description.toLowerCase().contains(q);
+                if (!matchName && !matchCat && !matchDesc) return false;
+              }
+
+              // 2. Category filter
+              if (_selectedCategory != 'all' && product.categoryId != _selectedCategory) {
+                return false;
+              }
+
+              // 3. Stock filter
+              if (_stockFilter == 'in_stock' && product.stock <= 10) return false;
+              if (_stockFilter == 'low_stock' && (product.stock <= 0 || product.stock > 10)) return false;
+              if (_stockFilter == 'out_of_stock' && product.stock > 0) return false;
+
+              return true;
+            }).toList();
+
+            // Sort logic
+            filteredProducts.sort((a, b) {
+              switch (_sortBy) {
+                case 'name_desc':
+                  return b.name.toLowerCase().compareTo(a.name.toLowerCase());
+                case 'price_asc':
+                  return a.discountPrice.compareTo(b.discountPrice);
+                case 'price_desc':
+                  return b.discountPrice.compareTo(a.discountPrice);
+                case 'stock_asc':
+                  return a.stock.compareTo(b.stock);
+                case 'stock_desc':
+                  return b.stock.compareTo(a.stock);
+                case 'newest':
+                  final dateA = a.createdAt ?? DateTime(2020);
+                  final dateB = b.createdAt ?? DateTime(2020);
+                  return dateB.compareTo(dateA);
+                case 'name_asc':
+                default:
+                  return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+              }
+            });
+
+            final totalCount = products.length;
+            final lowStockCount = products.where((p) => p.stock > 0 && p.stock <= 10).length;
+            final outOfStockCount = products.where((p) => p.stock <= 0).length;
+
+            return Column(
+              children: [
+                // Top Search & Filter Panel
+                Container(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // 1. Search Bar Field
+                      TextField(
+                        controller: _searchController,
+                        onChanged: (val) => setState(() => _searchQuery = val.trim()),
+                        decoration: InputDecoration(
+                          hintText: 'Search products by name, category, or description...',
+                          prefixIcon: const Icon(Icons.search, color: Color(0xFFC59B27)),
+                          suffixIcon: _searchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.clear, size: 18),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() => _searchQuery = '');
+                                  },
+                                )
+                              : null,
+                          filled: true,
+                          fillColor: Theme.of(context).cardTheme.color ?? Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.amber.shade200),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.outlineVariant.withAlpha(120),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFC59B27), width: 1.8),
+                          ),
                         ),
-                        IconButton(
-                          tooltip: 'Edit Product',
-                          icon: const Icon(Icons.edit_outlined),
-                          onPressed: () => _showProductDialog(context, ref, product: product),
+                      ),
+                      const SizedBox(height: 10),
+
+                      // 2. Filters & Sort Controls Row
+                      Row(
+                        children: [
+                          // Stock Filter Dropdown / Selector
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  // Stock Filter Chips
+                                  _buildFilterChip(
+                                    label: 'All Items',
+                                    selected: _stockFilter == 'all',
+                                    onSelected: () => setState(() => _stockFilter = 'all'),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  _buildFilterChip(
+                                    label: 'In Stock',
+                                    selected: _stockFilter == 'in_stock',
+                                    badgeColor: Colors.teal,
+                                    onSelected: () => setState(() => _stockFilter = 'in_stock'),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  _buildFilterChip(
+                                    label: 'Low Stock ($lowStockCount)',
+                                    selected: _stockFilter == 'low_stock',
+                                    badgeColor: Colors.amber.shade900,
+                                    onSelected: () => setState(() => _stockFilter = 'low_stock'),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  _buildFilterChip(
+                                    label: 'Out of Stock ($outOfStockCount)',
+                                    selected: _stockFilter == 'out_of_stock',
+                                    badgeColor: Colors.red.shade700,
+                                    onSelected: () => setState(() => _stockFilter = 'out_of_stock'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
+                          // Sort Button / Menu
+                          PopupMenuButton<String>(
+                            initialValue: _sortBy,
+                            tooltip: 'Sort Products',
+                            onSelected: (val) => setState(() => _sortBy = val),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.outlineVariant.withAlpha(150),
+                                ),
+                                color: Theme.of(context).cardTheme.color,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.sort, size: 16, color: Color(0xFFC59B27)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _getSortLabel(_sortBy),
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                                  ),
+                                  const Icon(Icons.arrow_drop_down, size: 16),
+                                ],
+                              ),
+                            ),
+                            itemBuilder: (context) => [
+                              const PopupMenuItem(value: 'name_asc', child: Text('Name (A to Z)')),
+                              const PopupMenuItem(value: 'name_desc', child: Text('Name (Z to A)')),
+                              const PopupMenuItem(value: 'price_asc', child: Text('Price (Lowest First)')),
+                              const PopupMenuItem(value: 'price_desc', child: Text('Price (Highest First)')),
+                              const PopupMenuItem(value: 'stock_asc', child: Text('Stock (Lowest / Needs Restock)')),
+                              const PopupMenuItem(value: 'stock_desc', child: Text('Stock (Highest First)')),
+                              const PopupMenuItem(value: 'newest', child: Text('Recently Added')),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+
+                      // 3. Horizontal Category Filter Chips
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            ChoiceChip(
+                              label: const Text('All Categories'),
+                              selected: _selectedCategory == 'all',
+                              onSelected: (_) => setState(() => _selectedCategory = 'all'),
+                            ),
+                            const SizedBox(width: 6),
+                            for (final catId in availableCategories) ...[
+                              ChoiceChip(
+                                label: Text(categoryMap[catId] ?? catId),
+                                selected: _selectedCategory == catId,
+                                onSelected: (_) => setState(() => _selectedCategory = catId),
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                          ],
                         ),
-                        IconButton(
-                          tooltip: 'Delete Product',
-                          icon: const Icon(Icons.delete_outline, color: Colors.red),
-                          onPressed: () => _confirmDelete(context, ref, product),
-                        ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 10),
+
+                      // 4. Live Stats Bar
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Showing ${filteredProducts.length} of $totalCount products',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                          if (_searchQuery.isNotEmpty || _selectedCategory != 'all' || _stockFilter != 'all')
+                            InkWell(
+                              onTap: _clearFilters,
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                child: Text(
+                                  'Clear all filters',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFFC59B27),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
-                );
-              },
+                ),
+                const Divider(height: 1),
+
+                // Product List
+                Expanded(
+                  child: filteredProducts.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.search_off_outlined, size: 56, color: Colors.grey.shade400),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'No products found matching your search',
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  'Try adjusting the search query or clearing your category & stock filters.',
+                                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 16),
+                                FilledButton.tonal(
+                                  onPressed: _clearFilters,
+                                  child: const Text('Reset All Filters'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: filteredProducts.length,
+                          itemBuilder: (context, index) {
+                            final product = filteredProducts[index];
+                            final catName = categoryMap[product.categoryId] ?? product.categoryId;
+                            return _AdminProductCard(
+                              product: product,
+                              categoryName: catName,
+                              onEditStock: () => _showStockDialog(context, ref, product),
+                              onEditProduct: () => _showProductDialog(context, ref, product: product),
+                              onDelete: () => _confirmDelete(context, ref, product),
+                            );
+                          },
+                        ),
+                ),
+              ],
             );
           },
         ),
@@ -156,31 +445,184 @@ class AdminProductsScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildFilterChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onSelected,
+    Color? badgeColor,
+  }) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onSelected(),
+      labelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: selected ? Colors.white : (badgeColor ?? Colors.black87),
+      ),
+      selectedColor: badgeColor ?? const Color(0xFFC59B27),
+    );
+  }
+
+  String _getSortLabel(String sortBy) {
+    return switch (sortBy) {
+      'name_desc' => 'Name Z-A',
+      'price_asc' => 'Price ↑',
+      'price_desc' => 'Price ↓',
+      'stock_asc' => 'Stock ↑',
+      'stock_desc' => 'Stock ↓',
+      'newest' => 'Newest',
+      _ => 'Name A-Z',
+    };
+  }
+
   void _showStockDialog(BuildContext context, WidgetRef ref, ProductModel product) {
-    final controller = TextEditingController(text: product.stock.toString());
+    int currentStock = product.stock;
+    final controller = TextEditingController(text: currentStock.toString());
+
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Update Stock: ${product.name}'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(labelText: 'Stock Quantity'),
-          keyboardType: TextInputType.number,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final newStock = int.tryParse(controller.text) ?? product.stock;
-              await ref.read(adminRepositoryProvider).updateStock(product.id, newStock);
-              if (context.mounted) Navigator.pop(context);
-            },
-            child: const Text('Update'),
-          ),
-        ],
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setModalState) {
+          void updateVal(int delta) {
+            final nowVal = int.tryParse(controller.text) ?? currentStock;
+            final updated = (nowVal + delta).clamp(0, 99999);
+            controller.text = updated.toString();
+            setModalState(() {
+              currentStock = updated;
+            });
+          }
+
+          void setDirectVal(int val) {
+            controller.text = val.toString();
+            setModalState(() {
+              currentStock = val;
+            });
+          }
+
+          return AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.inventory_2_outlined, color: Color(0xFFC59B27)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Update Stock: ${product.name}',
+                    style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Adjust the current stock quantity for this item in real-time.',
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                ),
+                const SizedBox(height: 16),
+
+                // Direct Text Field with Steppers
+                Row(
+                  children: [
+                    IconButton.filledTonal(
+                      tooltip: 'Decrease 1',
+                      icon: const Icon(Icons.remove),
+                      onPressed: () => updateVal(-1),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: controller,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        decoration: InputDecoration(
+                          labelText: 'Stock Units',
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (val) {
+                          final parsed = int.tryParse(val);
+                          if (parsed != null) {
+                            setModalState(() => currentStock = parsed);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton.filledTonal(
+                      tooltip: 'Increase 1',
+                      icon: const Icon(Icons.add),
+                      onPressed: () => updateVal(1),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // Quick Increment/Decrement Buttons
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () => updateVal(-10),
+                      child: const Text('-10'),
+                    ),
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () => updateVal(10),
+                      child: const Text('+10'),
+                    ),
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () => updateVal(50),
+                      child: const Text('+50'),
+                    ),
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red.shade700,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      onPressed: () => setDirectVal(0),
+                      child: const Text('Out of Stock'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFFC59B27),
+                ),
+                onPressed: () async {
+                  final newStock = int.tryParse(controller.text) ?? currentStock;
+                  await ref.read(adminRepositoryProvider).updateStock(product.id, newStock);
+                  if (dialogContext.mounted) Navigator.pop(dialogContext);
+                },
+                child: const Text('Save Stock'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -678,6 +1120,279 @@ class AdminProductsScreen extends ConsumerWidget {
         );
       }
     }
+  }
+}
+
+class _AdminProductCard extends StatelessWidget {
+  const _AdminProductCard({
+    required this.product,
+    required this.categoryName,
+    required this.onEditStock,
+    required this.onEditProduct,
+    required this.onDelete,
+  });
+
+  final ProductModel product;
+  final String categoryName;
+  final VoidCallback onEditStock;
+  final VoidCallback onEditProduct;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasDiscount = product.price > product.discountPrice;
+    final discountPercent = hasDiscount
+        ? (((product.price - product.discountPrice) / product.price) * 100).round()
+        : 0;
+
+    final isOutOfStock = product.stock <= 0;
+    final isLowStock = product.stock > 0 && product.stock <= 10;
+
+    final Color stockColor = isOutOfStock
+        ? Colors.red.shade700
+        : isLowStock
+            ? Colors.amber.shade900
+            : Colors.teal.shade700;
+
+    final String stockLabel = isOutOfStock
+        ? 'Out of Stock (0)'
+        : isLowStock
+            ? 'Low Stock (${product.stock} left)'
+            : 'In Stock (${product.stock})';
+
+    final IconData stockIcon = isOutOfStock
+        ? Icons.cancel_outlined
+        : isLowStock
+            ? Icons.warning_amber_rounded
+            : Icons.check_circle_outline;
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outlineVariant.withAlpha(70),
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Product Image Thumbnail
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                width: 76,
+                height: 76,
+                color: const Color(0xFFFFF9E8),
+                child: product.imageUrls.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: product.imageUrls.first,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Center(
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => const Center(
+                          child: Icon(Icons.inventory_2_outlined, color: Color(0xFFC59B27), size: 30),
+                        ),
+                      )
+                    : const Center(
+                        child: Icon(Icons.inventory_2_outlined, color: Color(0xFFC59B27), size: 30),
+                      ),
+              ),
+            ),
+            const SizedBox(width: 14),
+
+            // 2. Product Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title & Badges
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          product.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            height: 1.25,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+
+                  // Category & Tags
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFC59B27).withAlpha(20),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          categoryName.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF7A5900),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      if (product.isBestSeller)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade100,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'BESTSELLER',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange.shade900,
+                            ),
+                          ),
+                        ),
+                      if (product.isFeatured)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.shade100,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'FEATURED',
+                            style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.amber.shade900,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Price Information
+                  Row(
+                    children: [
+                      Text(
+                        MoneyFormatter.format(product.discountPrice),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Color(0xFF4A3700),
+                        ),
+                      ),
+                      if (hasDiscount) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          MoneyFormatter.format(product.price),
+                          style: TextStyle(
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.grey.shade500,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '$discountPercent% off',
+                          style: TextStyle(
+                            color: Colors.green.shade700,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+
+                  // Interactive Stock Badge
+                  InkWell(
+                    onTap: onEditStock,
+                    borderRadius: BorderRadius.circular(6),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: stockColor.withAlpha(25),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: stockColor.withAlpha(100), width: 0.8),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(stockIcon, size: 13, color: stockColor),
+                          const SizedBox(width: 5),
+                          Text(
+                            stockLabel,
+                            style: TextStyle(
+                              color: stockColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(Icons.edit, size: 11, color: stockColor.withAlpha(180)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 3. Actions Column
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  tooltip: 'Update Stock Units',
+                  icon: const Icon(Icons.warehouse_outlined, size: 20),
+                  color: const Color(0xFFC59B27),
+                  onPressed: onEditStock,
+                ),
+                IconButton(
+                  tooltip: 'Edit Full Product',
+                  icon: const Icon(Icons.edit_outlined, size: 20),
+                  color: Colors.blue.shade700,
+                  onPressed: onEditProduct,
+                ),
+                IconButton(
+                  tooltip: 'Delete Product',
+                  icon: const Icon(Icons.delete_outline, size: 20),
+                  color: Colors.red.shade700,
+                  onPressed: onDelete,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

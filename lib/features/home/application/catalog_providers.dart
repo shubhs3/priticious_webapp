@@ -12,6 +12,7 @@ import '../../../core/repositories/firestore_order_repository.dart';
 import '../../../core/repositories/order_repository.dart';
 import '../../../core/repositories/sample_catalog_repository.dart';
 import '../../../core/repositories/sample_order_repository.dart';
+import '../../../core/services/auth_service.dart';
 import '../../../core/services/firebase_bootstrap.dart';
 import '../../../core/services/firebase_providers.dart';
 
@@ -39,7 +40,8 @@ final addressRepositoryProvider = Provider<AddressRepository>((ref) {
 const guestCustomerId = 'guest';
 
 final currentCustomerIdProvider = Provider<String>((ref) {
-  final authUser = ref.watch(firebaseAuthProvider).currentUser;
+  final authState = ref.watch(authStateProvider);
+  final authUser = authState.valueOrNull;
   return authUser?.uid ?? guestCustomerId;
 });
 
