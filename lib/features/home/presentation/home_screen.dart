@@ -167,12 +167,13 @@ class HomeScreen extends ConsumerWidget {
   }
 
   void _addToCart(BuildContext context, WidgetRef ref, ProductModel product) {
+    final weight = product.defaultWeightOption;
     ref
       .read(cartControllerProvider.notifier)
-      .addProduct(product, product.weightOptions.first);
+      .addProduct(product, weight);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${product.name} added to cart'),
+        content: Text('${product.name} (${weight.label}) added to cart'),
         duration: const Duration(seconds: 1),
       ),
     );
@@ -658,11 +659,11 @@ class _DryFruitHouseFooter extends StatelessWidget {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Contact Us', style: TextStyle(color: Color(0xFF7A5900), fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(height: 4),
-                    const Text('📞 +91-7483600212 / 9364896022', style: TextStyle(color: Color(0xFF5A481C), fontSize: 11)),
-                    const Text('✉️ info@priticious.com', style: TextStyle(color: Color(0xFF5A481C), fontSize: 11)),
+                  children: const [
+                    Text('Contact Us', style: TextStyle(color: Color(0xFF7A5900), fontWeight: FontWeight.bold, fontSize: 13)),
+                    SizedBox(height: 4),
+                    Text('📞 +91-9999909122', style: TextStyle(color: Color(0xFF5A481C), fontSize: 11)),
+                    Text('✉️ priticiousdryfruits@gmail.com', style: TextStyle(color: Color(0xFF5A481C), fontSize: 11)),
                   ],
                 ),
                 Column(
@@ -673,11 +674,6 @@ class _DryFruitHouseFooter extends StatelessWidget {
                     InkWell(
                       onTap: () => context.go('/bulk-orders'),
                       child: const Text('• Bulk Orders', style: TextStyle(color: Color(0xFF5A481C), fontSize: 11)),
-                    ),
-                    const SizedBox(height: 2),
-                    InkWell(
-                      onTap: () => context.go('/locations'),
-                      child: const Text('• Store Locations', style: TextStyle(color: Color(0xFF5A481C), fontSize: 11)),
                     ),
                   ],
                 ),

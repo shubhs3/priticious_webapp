@@ -37,7 +37,8 @@ class CartController extends StateNotifier<List<CartItemModel>> {
   void addProduct(ProductModel product, ProductWeightOption weightOption) {
     final existingIndex = state.indexWhere(
       (item) =>
-          item.productId == product.id && item.weightOption == weightOption,
+          item.productId == product.id &&
+          item.weightOption.grams == weightOption.grams,
     );
     if (existingIndex == -1) {
       state = [
@@ -57,7 +58,11 @@ class CartController extends StateNotifier<List<CartItemModel>> {
     state = [
       for (final (index, item) in state.indexed)
         if (index == existingIndex)
-          item.copyWith(quantity: item.quantity + 1)
+          item.copyWith(
+            quantity: item.quantity + 1,
+            unitPrice: weightOption.discountPrice,
+            weightOption: weightOption,
+          )
         else
           item,
     ];
@@ -90,7 +95,7 @@ class CartController extends StateNotifier<List<CartItemModel>> {
 
   bool _matches(CartItemModel left, CartItemModel right) {
     return left.productId == right.productId &&
-        left.weightOption == right.weightOption;
+        left.weightOption.grams == right.weightOption.grams;
   }
 }
 

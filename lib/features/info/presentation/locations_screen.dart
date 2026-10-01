@@ -10,25 +10,25 @@ class LocationsScreen extends StatelessWidget {
     {
       'city': 'Bengaluru - HSR Layout',
       'address': 'No. 452, 27th Main Rd, Sector 1, HSR Layout, Bengaluru, Karnataka 560102',
-      'phone': '+91-7483600212',
+      'phone': '+91-9999909122',
       'timing': '9:30 AM - 10:00 PM (All Days)',
     },
     {
       'city': 'Bengaluru - Indiranagar',
       'address': '100 Feet Rd, 12th Main Corner, Indiranagar, Bengaluru, Karnataka 560038',
-      'phone': '+91-9364896022',
+      'phone': '+91-9999909122',
       'timing': '9:30 AM - 10:00 PM (All Days)',
     },
     {
       'city': 'Hyderabad - Jubilee Hills',
       'address': 'Road No. 36, Near Metro Station, Jubilee Hills, Hyderabad, Telangana 500033',
-      'phone': '+91-9876543210',
+      'phone': '+91-9999909122',
       'timing': '10:00 AM - 9:30 PM (All Days)',
     },
     {
       'city': 'Mumbai - Bandra West',
       'address': 'Linking Road, Opposite Shoppers Stop, Bandra West, Mumbai, Maharashtra 400050',
-      'phone': '+91-9820123456',
+      'phone': '+91-9999909122',
       'timing': '10:00 AM - 10:00 PM (All Days)',
     },
   ];

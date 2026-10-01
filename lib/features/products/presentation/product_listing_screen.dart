@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/models/product_model.dart';
 import '../../../features/cart/application/cart_controller.dart';
 import '../../../features/home/application/catalog_providers.dart';
 import '../../../shared/widgets/product_grid.dart';
@@ -20,11 +21,12 @@ class ProductListingScreen extends ConsumerWidget {
             data: (items) => ProductGrid(
               products: items,
               onAdd: (product) {
+                final weight = product.defaultWeightOption;
                 ref
                     .read(cartControllerProvider.notifier)
-                    .addProduct(product, product.weightOptions.first);
+                    .addProduct(product, weight);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${product.name} added to cart')),
+                  SnackBar(content: Text('${product.name} (${weight.label}) added to cart')),
                 );
               },
             ),

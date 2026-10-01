@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
@@ -68,13 +69,30 @@ class AdminCustomersScreen extends ConsumerWidget {
                         Text('Joined: $joinedDate'),
                       ],
                     ),
-                    trailing: const Icon(Icons.chevron_right),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.add_call, color: Color(0xFFC59B27)),
+                          tooltip: 'Book Phone Order for ${user.displayName ?? "Customer"}',
+                          onPressed: () => context.go('/admin/create-order', extra: user),
+                        ),
+                        const Icon(Icons.chevron_right),
+                      ],
+                    ),
                   ),
                 );
               },
             );
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF4A3700),
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_call),
+        label: const Text('New Phone Order', style: TextStyle(fontWeight: FontWeight.bold)),
+        onPressed: () => context.go('/admin/create-order'),
       ),
     );
   }
@@ -133,6 +151,20 @@ class _CustomerDetailDialog extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                      foregroundColor: Theme.of(context).colorScheme.primaryContainer,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    ),
+                    icon: const Icon(Icons.add_call, size: 16),
+                    label: const Text('Book Order', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.go('/admin/create-order', extra: user);
+                    },
+                  ),
+                  const SizedBox(width: 6),
                   IconButton(
                     icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimaryContainer),
                     onPressed: () => Navigator.pop(context),
@@ -165,12 +197,29 @@ class _CustomerDetailDialog extends ConsumerWidget {
                               }
                               final orders = snapshot.data ?? [];
                               if (orders.isEmpty) {
-                                return const Center(
+                                return Center(
                                   child: Padding(
-                                    padding: EdgeInsets.all(24.0),
-                                    child: Text(
-                                      'No orders placed by this customer.',
-                                      style: TextStyle(color: Colors.grey),
+                                    padding: const EdgeInsets.all(24.0),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Text(
+                                          'No orders placed by this customer yet.',
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        FilledButton.icon(
+                                          style: FilledButton.styleFrom(
+                                            backgroundColor: const Color(0xFFC59B27),
+                                          ),
+                                          icon: const Icon(Icons.add_call, size: 16),
+                                          label: const Text('Create Phone Order for Customer'),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                            context.go('/admin/create-order', extra: user);
+                                          },
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 );

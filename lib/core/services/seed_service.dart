@@ -7,6 +7,7 @@ import '../data/seed_data.dart';
 import '../models/address_model.dart';
 import '../models/cart_model.dart';
 import '../models/order_model.dart';
+import '../models/product_model.dart';
 import '../utils/firestore_helpers.dart';
 
 enum SeedType { categories, products, banners, settings, orders }
@@ -101,7 +102,7 @@ class SeedService {
 
   Future<String> _seedOrders() async {
     final product = sampleProducts.first;
-    final weight = product.weightOptions.first;
+    final weight = product.defaultWeightOption;
     final now = DateTime.now();
 
     final sampleOrder = OrderModel(

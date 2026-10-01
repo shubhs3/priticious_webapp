@@ -689,16 +689,38 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
       sheetObject.appendRow([
         TextCellValue('Product ID'),
         TextCellValue('Product Name'),
-        TextCellValue('Price (Rupees)'),
-        TextCellValue('Discount Price (Rupees)'),
+        TextCellValue('250gm Price (MRP)'),
+        TextCellValue('250gm Discount Price'),
+        TextCellValue('500gm Price (MRP)'),
+        TextCellValue('500gm Discount Price'),
+        TextCellValue('1kg Price (MRP)'),
+        TextCellValue('1kg Discount Price'),
       ]);
 
       for (final p in products) {
+        final options = p.standardWeightOptions;
+        final opt250 = options.where((w) => w.grams == 250 || w.label.contains('250')).firstOrNull;
+        final opt500 = options.where((w) => w.grams == 500 || w.label.contains('500')).firstOrNull;
+        final opt1k = options.where((w) => w.grams == 1000 || w.label.contains('1')).firstOrNull;
+
+        final p250 = opt250?.price ?? (p.price > 0 ? p.price : 399.0);
+        final dp250 = opt250?.discountPrice ?? (p.discountPrice > 0 ? p.discountPrice : 349.0);
+
+        final p500 = opt500?.price ?? (p250 * 1.9).roundToDouble();
+        final dp500 = opt500?.discountPrice ?? (dp250 * 1.9).roundToDouble();
+
+        final p1k = opt1k?.price ?? (p250 * 3.6).roundToDouble();
+        final dp1k = opt1k?.discountPrice ?? (dp250 * 3.6).roundToDouble();
+
         sheetObject.appendRow([
           TextCellValue(p.id),
           TextCellValue(p.name),
-          DoubleCellValue(p.price),
-          DoubleCellValue(p.discountPrice),
+          DoubleCellValue(p250),
+          DoubleCellValue(dp250),
+          DoubleCellValue(p500),
+          DoubleCellValue(dp500),
+          DoubleCellValue(p1k),
+          DoubleCellValue(dp1k),
         ]);
       }
 
@@ -730,8 +752,12 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
         TextCellValue('Name'),
         TextCellValue('Category Slug'),
         TextCellValue('Description'),
-        TextCellValue('Price (Rupees)'),
-        TextCellValue('Discount Price (Rupees)'),
+        TextCellValue('250gm Price (MRP)'),
+        TextCellValue('250gm Discount Price'),
+        TextCellValue('500gm Price (MRP)'),
+        TextCellValue('500gm Discount Price'),
+        TextCellValue('1kg Price (MRP)'),
+        TextCellValue('1kg Discount Price'),
         TextCellValue('Stock'),
         TextCellValue('Storage Instructions'),
       ]);
@@ -743,6 +769,10 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
         TextCellValue('High quality California almonds, raw and crunchy.'),
         DoubleCellValue(399.0),
         DoubleCellValue(349.0),
+        DoubleCellValue(749.0),
+        DoubleCellValue(649.0),
+        DoubleCellValue(1399.0),
+        DoubleCellValue(1249.0),
         IntCellValue(100),
         TextCellValue('Store in a cool, dry place.'),
       ]);
@@ -845,18 +875,55 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
           if (row.isEmpty) continue;
 
           final id = _getCellValue(row, 0);
-          if (id.isEmpty || id.toLowerCase() == 'product id') continue;
+          if (id.isEmpty || id.toLowerCase().contains('product id')) continue;
 
-          final price = _getCellDouble(row, 2, 0.0);
-          final discount = _getCellDouble(row, 3, 0.0);
+          // 250g prices (MRP & Selling Price)
+          double p250 = _getCellDouble(row, 2, 0.0);
+          double dp250 = _getCellDouble(row, 3, 0.0);
 
-          if (price > 0.0 && discount > 0.0) {
-            updates.add({
-              'id': id,
-              'price': price,
-              'discountPrice': discount,
-            });
-          }
+          if (p250 <= 0.0 && dp250 <= 0.0) continue;
+          if (p250 <= 0.0) p250 = dp250;
+          if (dp250 <= 0.0) dp250 = p250;
+
+          // 500g prices (MRP & Selling Price)
+          double p500 = _getCellDouble(row, 4, 0.0);
+          double dp500 = _getCellDouble(row, 5, 0.0);
+          if (p500 <= 0.0) p500 = (p250 * 1.9).roundToDouble();
+          if (dp500 <= 0.0) dp500 = (dp250 * 1.9).roundToDouble();
+
+          // 1kg prices (MRP & Selling Price)
+          double p1k = _getCellDouble(row, 6, 0.0);
+          double dp1k = _getCellDouble(row, 7, 0.0);
+          if (p1k <= 0.0) p1k = (p250 * 3.6).roundToDouble();
+          if (dp1k <= 0.0) dp1k = (dp250 * 3.6).roundToDouble();
+
+          final weightOptions = [
+            {
+              'label': '250 g',
+              'grams': 250,
+              'price': p250,
+              'discountPrice': dp250,
+            },
+            {
+              'label': '500 g',
+              'grams': 500,
+              'price': p500,
+              'discountPrice': dp500,
+            },
+            {
+              'label': '1 kg',
+              'grams': 1000,
+              'price': p1k,
+              'discountPrice': dp1k,
+            },
+          ];
+
+          updates.add({
+            'id': id,
+            'price': p250,
+            'discountPrice': dp250,
+            'weightOptions': weightOptions,
+          });
         }
       }
 
@@ -974,12 +1041,41 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
           if (name.isEmpty || categoryId.isEmpty) continue;
           if (name.toLowerCase() == 'name' || categoryId.toLowerCase() == 'category slug') continue;
 
-          final price = _getCellDouble(row, 3, 349.0);
-          final discount = _getCellDouble(row, 4, 299.0);
-          final stock = _getCellInt(row, 5, 100);
-          final storage = _getCellValue(row, 6).isNotEmpty
-              ? _getCellValue(row, 6)
-              : 'Cool and dry place.';
+          double p250;
+          double dp250;
+          double p500;
+          double dp500;
+          double p1k;
+          double dp1k;
+          int stock;
+          String storage;
+
+          // Check if new 11-column template (with 250g, 500g, 1kg prices)
+          if (row.length >= 10) {
+            p250 = _getCellDouble(row, 3, 399.0);
+            dp250 = _getCellDouble(row, 4, 349.0);
+            p500 = _getCellDouble(row, 5, 0.0);
+            dp500 = _getCellDouble(row, 6, 0.0);
+            p1k = _getCellDouble(row, 7, 0.0);
+            dp1k = _getCellDouble(row, 8, 0.0);
+            stock = _getCellInt(row, 9, 100);
+            storage = _getCellValue(row, 10).isNotEmpty ? _getCellValue(row, 10) : 'Cool and dry place.';
+
+            if (p500 <= 0.0) p500 = (p250 * 1.9).roundToDouble();
+            if (dp500 <= 0.0) dp500 = (dp250 * 1.9).roundToDouble();
+            if (p1k <= 0.0) p1k = (p250 * 3.6).roundToDouble();
+            if (dp1k <= 0.0) dp1k = (dp250 * 3.6).roundToDouble();
+          } else {
+            // Legacy 7-column template fallback
+            p250 = _getCellDouble(row, 3, 399.0);
+            dp250 = _getCellDouble(row, 4, 349.0);
+            p500 = (p250 * 1.9).roundToDouble();
+            dp500 = (dp250 * 1.9).roundToDouble();
+            p1k = (p250 * 3.6).roundToDouble();
+            dp1k = (dp250 * 3.6).roundToDouble();
+            stock = _getCellInt(row, 5, 100);
+            storage = _getCellValue(row, 6).isNotEmpty ? _getCellValue(row, 6) : 'Cool and dry place.';
+          }
 
           final id = const Uuid().v4();
           final imgUrl = _getDefaultProductImage(categoryId, name);
@@ -992,26 +1088,26 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
               name: name,
               description: description,
               imageUrls: [imgUrl],
-              price: price,
-              discountPrice: discount,
+              price: p250,
+              discountPrice: dp250,
               weightOptions: [
                 ProductWeightOption(
                   label: '250 g',
                   grams: 250,
-                  price: discount,
-                  discountPrice: (discount * 0.9).roundToDouble(),
+                  price: p250,
+                  discountPrice: dp250,
                 ),
                 ProductWeightOption(
                   label: '500 g',
                   grams: 500,
-                  price: (discount * 1.8).roundToDouble(),
-                  discountPrice: (discount * 1.6).roundToDouble(),
+                  price: p500,
+                  discountPrice: dp500,
                 ),
                 ProductWeightOption(
                   label: '1 kg',
                   grams: 1000,
-                  price: (discount * 3.5).roundToDouble(),
-                  discountPrice: (discount * 3.1).roundToDouble(),
+                  price: p1k,
+                  discountPrice: dp1k,
                 ),
               ],
               stock: stock,
@@ -1070,34 +1166,44 @@ class _AdminProductsScreenState extends ConsumerState<AdminProductsScreen> {
         final defaultImg = _getDefaultProductImage(p.categoryId, p.name);
         final hasImage = p.imageUrls.isNotEmpty && p.imageUrls.first.isNotEmpty;
 
+        final basePrice = p.price > 0 ? p.price : 399.0;
+        final baseDiscount = p.discountPrice > 0 ? p.discountPrice : 349.0;
+
+        // Ensure 250g, 500g, and 1kg weights exist and reflect this product's individual prices
+        List<ProductWeightOption> updatedWeights = p.weightOptions;
+        if (updatedWeights.length < 3 ||
+            (updatedWeights.isNotEmpty && updatedWeights.first.discountPrice != baseDiscount)) {
+          updatedWeights = [
+            ProductWeightOption(
+              label: '250 g',
+              grams: 250,
+              price: basePrice,
+              discountPrice: baseDiscount,
+            ),
+            ProductWeightOption(
+              label: '500 g',
+              grams: 500,
+              price: (basePrice * 1.9).roundToDouble(),
+              discountPrice: (baseDiscount * 1.9).roundToDouble(),
+            ),
+            ProductWeightOption(
+              label: '1 kg',
+              grams: 1000,
+              price: (basePrice * 3.6).roundToDouble(),
+              discountPrice: (baseDiscount * 3.6).roundToDouble(),
+            ),
+          ];
+        }
+
         final updated = p.copyWith(
           imageUrls: hasImage ? p.imageUrls : [defaultImg],
           isFeatured: (i % 3 == 0),
           isBestSeller: (i % 2 == 0),
           isNewArrival: (i % 4 == 0),
           isRecentlyAdded: true,
-          weightOptions: p.weightOptions.isEmpty
-              ? [
-                  ProductWeightOption(
-                    label: '250 g',
-                    grams: 250,
-                    price: p.discountPrice,
-                    discountPrice: (p.discountPrice * 0.9).roundToDouble(),
-                  ),
-                  ProductWeightOption(
-                    label: '500 g',
-                    grams: 500,
-                    price: (p.discountPrice * 1.8).roundToDouble(),
-                    discountPrice: (p.discountPrice * 1.6).roundToDouble(),
-                  ),
-                  ProductWeightOption(
-                    label: '1 kg',
-                    grams: 1000,
-                    price: (p.discountPrice * 3.5).roundToDouble(),
-                    discountPrice: (p.discountPrice * 3.1).roundToDouble(),
-                  ),
-                ]
-              : p.weightOptions,
+          price: basePrice,
+          discountPrice: baseDiscount,
+          weightOptions: updatedWeights,
         );
 
         await repo.upsertProduct(updated);
@@ -1329,6 +1435,32 @@ class _AdminProductCard extends StatelessWidget {
                       ],
                     ],
                   ),
+                  const SizedBox(height: 4),
+
+                  // 3 Weight packs display
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      for (final opt in product.standardWeightOptions)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFAF5EC),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: const Color(0xFFE5DCC6), width: 0.8),
+                          ),
+                          child: Text(
+                            '${opt.label}: ₹${opt.discountPrice.toInt()}',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF5A4400),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: 6),
 
                   // Interactive Stock Badge
@@ -1409,8 +1541,12 @@ class _ProductEditDialogState extends ConsumerState<_ProductEditDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _categoryController;
   late final TextEditingController _descController;
-  late final TextEditingController _priceController;
-  late final TextEditingController _discountController;
+  late final TextEditingController _price250Controller;
+  late final TextEditingController _discount250Controller;
+  late final TextEditingController _price500Controller;
+  late final TextEditingController _discount500Controller;
+  late final TextEditingController _price1kController;
+  late final TextEditingController _discount1kController;
   late final TextEditingController _stockController;
   late final TextEditingController _storageController;
 
@@ -1422,11 +1558,27 @@ class _ProductEditDialogState extends ConsumerState<_ProductEditDialog> {
   void initState() {
     super.initState();
     final p = widget.product;
+    final options = p?.standardWeightOptions;
+    final opt250 = options?.where((w) => w.grams == 250 || w.label.contains('250')).firstOrNull;
+    final opt500 = options?.where((w) => w.grams == 500 || w.label.contains('500')).firstOrNull;
+    final opt1k = options?.where((w) => w.grams == 1000 || w.label.contains('1')).firstOrNull;
+
+    final p250 = opt250?.price ?? p?.price ?? 399.0;
+    final dp250 = opt250?.discountPrice ?? p?.discountPrice ?? 349.0;
+    final p500 = opt500?.price ?? (p250 * 1.9).roundToDouble();
+    final dp500 = opt500?.discountPrice ?? (dp250 * 1.9).roundToDouble();
+    final p1k = opt1k?.price ?? (p250 * 3.6).roundToDouble();
+    final dp1k = opt1k?.discountPrice ?? (dp250 * 3.6).roundToDouble();
+
     _nameController = TextEditingController(text: p?.name ?? '');
     _categoryController = TextEditingController(text: p?.categoryId ?? 'almonds');
     _descController = TextEditingController(text: p?.description ?? '');
-    _priceController = TextEditingController(text: p?.price.toString() ?? '349.0');
-    _discountController = TextEditingController(text: p?.discountPrice.toString() ?? '299.0');
+    _price250Controller = TextEditingController(text: p250.toStringAsFixed(0));
+    _discount250Controller = TextEditingController(text: dp250.toStringAsFixed(0));
+    _price500Controller = TextEditingController(text: p500.toStringAsFixed(0));
+    _discount500Controller = TextEditingController(text: dp500.toStringAsFixed(0));
+    _price1kController = TextEditingController(text: p1k.toStringAsFixed(0));
+    _discount1kController = TextEditingController(text: dp1k.toStringAsFixed(0));
     _stockController = TextEditingController(text: p?.stock.toString() ?? '100');
     _storageController = TextEditingController(text: p?.storageInstructions ?? 'Cool and dry place.');
 
@@ -1440,8 +1592,12 @@ class _ProductEditDialogState extends ConsumerState<_ProductEditDialog> {
     _nameController.dispose();
     _categoryController.dispose();
     _descController.dispose();
-    _priceController.dispose();
-    _discountController.dispose();
+    _price250Controller.dispose();
+    _discount250Controller.dispose();
+    _price500Controller.dispose();
+    _discount500Controller.dispose();
+    _price1kController.dispose();
+    _discount1kController.dispose();
     _stockController.dispose();
     _storageController.dispose();
     super.dispose();
@@ -1528,25 +1684,98 @@ class _ProductEditDialogState extends ConsumerState<_ProductEditDialog> {
                 decoration: const InputDecoration(labelText: 'Description'),
                 maxLines: 2,
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _priceController,
-                      decoration: const InputDecoration(labelText: 'Price (paise)'),
-                      keyboardType: TextInputType.number,
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFAF7F2),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFE5DCC6)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Weight Packs & Pricing (₹)',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF4A3700)),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: _discountController,
-                      decoration: const InputDecoration(labelText: 'Discount Price (paise)'),
-                      keyboardType: TextInputType.number,
+                    const SizedBox(height: 8),
+                    // 250 gm
+                    Row(
+                      children: [
+                        const SizedBox(
+                          width: 65,
+                          child: Text('250 gm:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: _price250Controller,
+                            decoration: const InputDecoration(labelText: 'MRP (₹)', isDense: true),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _discount250Controller,
+                            decoration: const InputDecoration(labelText: 'Selling Price (₹)', isDense: true),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    // 500 gm
+                    Row(
+                      children: [
+                        const SizedBox(
+                          width: 65,
+                          child: Text('500 gm:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: _price500Controller,
+                            decoration: const InputDecoration(labelText: 'MRP (₹)', isDense: true),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _discount500Controller,
+                            decoration: const InputDecoration(labelText: 'Selling Price (₹)', isDense: true),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    // 1 kg
+                    Row(
+                      children: [
+                        const SizedBox(
+                          width: 65,
+                          child: Text('1 kg:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: _price1kController,
+                            decoration: const InputDecoration(labelText: 'MRP (₹)', isDense: true),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: TextField(
+                            controller: _discount1kController,
+                            decoration: const InputDecoration(labelText: 'Selling Price (₹)', isDense: true),
+                            keyboardType: TextInputType.number,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 8),
               Row(
@@ -1695,17 +1924,25 @@ class _ProductEditDialogState extends ConsumerState<_ProductEditDialog> {
               ? null
               : () async {
                   final id = widget.product?.id ?? const Uuid().v4();
+                  final p250 = double.tryParse(_price250Controller.text) ?? 399.0;
+                  final dp250 = double.tryParse(_discount250Controller.text) ?? 349.0;
+                  final p500 = double.tryParse(_price500Controller.text) ?? (p250 * 1.9).roundToDouble();
+                  final dp500 = double.tryParse(_discount500Controller.text) ?? (dp250 * 1.9).roundToDouble();
+                  final p1k = double.tryParse(_price1kController.text) ?? (p250 * 3.6).roundToDouble();
+                  final dp1k = double.tryParse(_discount1kController.text) ?? (dp250 * 3.6).roundToDouble();
+
                   final newProduct = ProductModel(
                     id: id,
                     categoryId: _categoryController.text.trim(),
                     name: _nameController.text.trim(),
                     description: _descController.text.trim(),
                     imageUrls: _imageUrls,
-                    price: double.tryParse(_priceController.text) ?? 349.0,
-                    discountPrice: double.tryParse(_discountController.text) ?? 299.0,
-                    weightOptions: widget.product?.weightOptions ?? [
-                      const ProductWeightOption(label: '250 g', grams: 250, price: 399.0, discountPrice: 349.0),
-                      const ProductWeightOption(label: '500 g', grams: 500, price: 749.0, discountPrice: 649.0),
+                    price: p250,
+                    discountPrice: dp250,
+                    weightOptions: [
+                      ProductWeightOption(label: '250 g', grams: 250, price: p250, discountPrice: dp250),
+                      ProductWeightOption(label: '500 g', grams: 500, price: p500, discountPrice: dp500),
+                      ProductWeightOption(label: '1 kg', grams: 1000, price: p1k, discountPrice: dp1k),
                     ],
                     stock: int.tryParse(_stockController.text) ?? 100,
                     nutrition: widget.product?.nutrition ?? {'Energy': '500 kcal'},

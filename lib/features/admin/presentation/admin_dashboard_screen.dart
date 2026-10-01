@@ -308,6 +308,16 @@ class AdminDashboardScreen extends ConsumerWidget {
                               icon: const Icon(Icons.add_circle_outline, size: 18),
                               label: const Text('Add Product'),
                             ),
+                            FilledButton.icon(
+                              style: FilledButton.styleFrom(
+                                backgroundColor: const Color(0xFFC59B27),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                              ),
+                              onPressed: () => context.go('/admin/create-order'),
+                              icon: const Icon(Icons.add_call, size: 18),
+                              label: const Text('Book Phone Order'),
+                            ),
                             OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.white,
@@ -506,6 +516,14 @@ class AdminDashboardScreen extends ConsumerWidget {
                             route: '/admin/orders',
                             badge: pendingOrdersCount > 0 ? '$pendingOrdersCount Pending' : null,
                             color: Colors.blue.shade700,
+                          ),
+                          _ModuleCard(
+                            title: 'Book Phone Order',
+                            subtitle: 'Create orders for call-in customers',
+                            icon: Icons.phone_in_talk,
+                            route: '/admin/create-order',
+                            badge: 'Call Booking',
+                            color: const Color(0xFFC59B27),
                           ),
                           _ModuleCard(
                             title: 'Inventory & Stock',

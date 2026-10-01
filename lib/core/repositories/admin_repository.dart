@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../constants/firestore_collections.dart';
+import '../models/address_model.dart';
 import '../models/banner_model.dart';
 import '../models/category_model.dart';
 import '../models/notification_model.dart';
@@ -68,11 +69,15 @@ class AdminRepository {
       for (final update in chunk) {
         final id = update['id'] as String;
         final docRef = _firestore.collection(FirestoreCollections.products).doc(id);
-        batch.update(docRef, {
+        final updateData = <String, dynamic>{
           'price': update['price'],
           'discountPrice': update['discountPrice'],
           'updatedAt': Timestamp.now(),
-        });
+        };
+        if (update.containsKey('weightOptions') && update['weightOptions'] != null) {
+          updateData['weightOptions'] = update['weightOptions'];
+        }
+        batch.update(docRef, updateData);
       }
       await batch.commit();
     }
@@ -197,6 +202,35 @@ class AdminRepository {
       'status': status.name,
       'updatedAt': Timestamp.now(),
     });
+  }
+
+  Future<void> createOrder(OrderModel order) async {
+    final now = DateTime.now();
+    final data = jsonToFirestore(
+      order
+          .copyWith(
+            placedAt: order.placedAt ?? now,
+            updatedAt: order.updatedAt ?? now,
+          )
+          .toJson(),
+    );
+    data.remove('id');
+    await _firestore.collection(FirestoreCollections.orders).doc(order.id).set(data);
+  }
+
+  Stream<List<AddressModel>> watchAddressesForCustomer(String customerId) {
+    return _firestore
+        .collection(FirestoreCollections.users)
+        .doc(customerId)
+        .collection('addresses')
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => AddressModel.fromJson(docDataWithId(doc)),
+              )
+              .toList(),
+        );
   }
 
   // ── Users ──

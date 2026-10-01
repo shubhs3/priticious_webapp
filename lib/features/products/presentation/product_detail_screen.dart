@@ -36,7 +36,12 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               message: 'This item is no longer available.',
             );
           }
-          final weight = selectedWeight ?? item.weightOptions.first;
+          final effectiveOptions = item.standardWeightOptions;
+          final weight = selectedWeight != null &&
+                  effectiveOptions.any((o) => o.grams == selectedWeight!.grams)
+              ? effectiveOptions
+                  .firstWhere((o) => o.grams == selectedWeight!.grams)
+              : effectiveOptions.first;
           return SingleChildScrollView(
             child: ResponsivePage(
               child: LayoutBuilder(
@@ -147,10 +152,14 @@ class _Details extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cartItems = ref.watch(cartControllerProvider);
     final cartItemIndex = cartItems.indexWhere(
-      (item) => item.productId == product.id && item.weightOption == weight,
+      (item) => item.productId == product.id && item.weightOption.grams == weight.grams,
     );
     final inCart = cartItemIndex != -1;
     final quantity = inCart ? cartItems[cartItemIndex].quantity : 0;
+    final hasDiscount = weight.price > weight.discountPrice;
+    final discountPercent = hasDiscount
+        ? (((weight.price - weight.discountPrice) / weight.price) * 100).round()
+        : 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,18 +173,54 @@ class _Details extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(product.description),
         const SizedBox(height: 16),
-        Text(
-          MoneyFormatter.format(weight.discountPrice),
-          style: Theme.of(context).textTheme.headlineSmall,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              MoneyFormatter.format(weight.discountPrice),
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFF7A5900),
+                  ),
+            ),
+            if (hasDiscount) ...[
+              const SizedBox(width: 10),
+              Text(
+                MoneyFormatter.format(weight.price),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      decoration: TextDecoration.lineThrough,
+                      color: Colors.grey.shade500,
+                    ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Text(
+                  '$discountPercent% OFF',
+                  style: TextStyle(
+                    color: Colors.green.shade700,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: 16),
         Wrap(
           spacing: 8,
           children: [
-            for (final option in product.weightOptions)
+            for (final option in product.standardWeightOptions)
               ChoiceChip(
                 label: Text(option.label),
-                selected: option == weight,
+                selected: option.grams == weight.grams,
                 onSelected: (_) => onWeightChanged(option),
               ),
           ],

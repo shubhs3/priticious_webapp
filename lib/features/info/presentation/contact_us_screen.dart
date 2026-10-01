@@ -75,7 +75,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                       child: _ContactDetailCard(
                         icon: Icons.phone,
                         title: 'Call Us',
-                        value: '+91-7483600212\n+91-9364896022',
+                        value: '+91-9999909122',
                       ),
                     ),
                     SizedBox(width: 12),
@@ -83,7 +83,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
                       child: _ContactDetailCard(
                         icon: Icons.email,
                         title: 'Email Us',
-                        value: 'info@priticious.com\nsupport@priticious.com',
+                        value: 'priticiousdryfruits@gmail.com',
                       ),
                     ),
                   ],

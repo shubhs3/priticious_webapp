@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/models/order_model.dart';
@@ -18,6 +19,25 @@ class AdminOrdersScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Order Management'),
+        actions: [
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFC59B27),
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => context.go('/admin/create-order'),
+            icon: const Icon(Icons.add_call, size: 18),
+            label: const Text('Book Phone Order'),
+          ),
+          const SizedBox(width: 16),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF4A3700),
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add_call),
+        label: const Text('New Phone Order', style: TextStyle(fontWeight: FontWeight.bold)),
+        onPressed: () => context.go('/admin/create-order'),
       ),
       body: ResponsivePage(
         maxWidth: 840,
@@ -34,7 +54,7 @@ class AdminOrdersScreen extends ConsumerWidget {
             }
 
             return ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 80),
               itemCount: orders.length,
               itemBuilder: (context, index) {
                 final order = orders[index];
@@ -70,6 +90,8 @@ class _AdminOrderCard extends ConsumerWidget {
     final formattedDate = order.placedAt != null ? dateFormat.format(order.placedAt!) : 'Date N/A';
     final statusColor = _getStatusColor(order.status);
 
+    final isPhoneOrder = order.deliveryInstructions?.toLowerCase().contains('phone') ?? false;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -77,9 +99,32 @@ class _AdminOrderCard extends ConsumerWidget {
         children: [
           ListTile(
             tileColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(102),
-            title: Text(
-              'ORDER ID: #${order.id.substring(0, 8).toUpperCase()}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            title: Row(
+              children: [
+                Text(
+                  'ORDER ID: #${order.id.substring(0, 8).toUpperCase()}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                if (isPhoneOrder) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFC59B27).withAlpha(40),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFC59B27)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.phone_in_talk, size: 12, color: Color(0xFF4A3700)),
+                        SizedBox(width: 4),
+                        Text('Phone Order', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF4A3700))),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
             ),
             subtitle: Text(formattedDate),
             trailing: PopupMenuButton<OrderStatus>(
@@ -168,6 +213,31 @@ class _AdminOrderCard extends ConsumerWidget {
                     ),
                   ],
                 ),
+                if (order.deliveryInstructions != null && order.deliveryInstructions!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9F6F0),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: const Color(0xFFE2D6BC)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.speaker_notes_outlined, size: 14, color: Color(0xFF7A5900)),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            order.deliveryInstructions!,
+                            style: const TextStyle(fontSize: 11, color: Color(0xFF4A3700), fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

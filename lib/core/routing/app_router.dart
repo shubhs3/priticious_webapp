@@ -29,6 +29,8 @@ import '../../features/admin/presentation/admin_orders_screen.dart';
 import '../../features/admin/presentation/admin_sales_screen.dart';
 import '../../features/admin/presentation/admin_customers_screen.dart';
 import '../../features/admin/presentation/admin_notifications_screen.dart';
+import '../../features/admin/presentation/admin_create_order_screen.dart';
+import '../models/user_model.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -127,6 +129,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'sales',
             builder: (context, state) => const AdminSalesScreen(),
+          ),
+          GoRoute(
+            path: 'create-order',
+            builder: (context, state) {
+              final customer = state.extra as UserModel?;
+              return AdminCreateOrderScreen(initialCustomer: customer);
+            },
           ),
         ],
       ),
@@ -245,11 +254,11 @@ class _TopWebHeader extends StatelessWidget {
                   children: const [
                     Icon(Icons.phone, size: 14, color: Color(0xFF4A3700)),
                     SizedBox(width: 6),
-                    Text('+91-7483600212 / 9364896022', style: TextStyle(color: Color(0xFF2C1E00), fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text('+91-9999909122', style: TextStyle(color: Color(0xFF2C1E00), fontSize: 12, fontWeight: FontWeight.bold)),
                     SizedBox(width: 20),
                     Icon(Icons.email_outlined, size: 14, color: Color(0xFF4A3700)),
                     SizedBox(width: 6),
-                    Text('info@priticious.com', style: TextStyle(color: Color(0xFF2C1E00), fontSize: 12, fontWeight: FontWeight.w600)),
+                    Text('priticiousdryfruits@gmail.com', style: TextStyle(color: Color(0xFF2C1E00), fontSize: 12, fontWeight: FontWeight.w600)),
                   ],
                 ),
               ],
@@ -309,7 +318,6 @@ class _TopWebHeader extends StatelessWidget {
                 _navButton(context, 'ABOUT US', '/about-us', location == '/about-us'),
                 _navButton(context, 'SHOP', '/products', location.startsWith('/products')),
                 _navButton(context, 'BULK ORDER', '/bulk-order', location == '/bulk-order'),
-                _navButton(context, 'LOCATIONS', '/locations', location == '/locations'),
                 _navButton(context, 'CONTACT US', '/contact-us', location == '/contact-us'),
 
                 const Spacer(),

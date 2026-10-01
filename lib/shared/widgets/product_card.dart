@@ -25,7 +25,27 @@ class _ProductCardState extends ConsumerState<ProductCard> {
   @override
   void initState() {
     super.initState();
-    _selectedWeight = widget.product.weightOptions.first;
+    _initWeight();
+  }
+
+  void _initWeight() {
+    final options = widget.product.standardWeightOptions;
+    _selectedWeight = options.first;
+  }
+
+  @override
+  void didUpdateWidget(covariant ProductCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.product.id != widget.product.id ||
+        oldWidget.product.weightOptions != widget.product.weightOptions ||
+        oldWidget.product.price != widget.product.price ||
+        oldWidget.product.discountPrice != widget.product.discountPrice) {
+      final options = widget.product.standardWeightOptions;
+      final match = options.where((o) => o.grams == _selectedWeight.grams).firstOrNull;
+      setState(() {
+        _selectedWeight = match ?? options.first;
+      });
+    }
   }
 
   @override
@@ -36,7 +56,7 @@ class _ProductCardState extends ConsumerState<ProductCard> {
 
     final cartItems = ref.watch(cartControllerProvider);
     final cartItemIndex = cartItems.indexWhere(
-      (item) => item.productId == product.id && item.weightOption == _selectedWeight,
+      (item) => item.productId == product.id && item.weightOption.grams == _selectedWeight.grams,
     );
     final inCart = cartItemIndex != -1;
     final quantity = inCart ? cartItems[cartItemIndex].quantity : 0;
@@ -184,7 +204,7 @@ class _ProductCardState extends ConsumerState<ProductCard> {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
-                          for (final option in product.weightOptions)
+                          for (final option in product.standardWeightOptions)
                             Padding(
                               padding: const EdgeInsets.only(right: 4),
                               child: InkWell(
@@ -192,12 +212,12 @@ class _ProductCardState extends ConsumerState<ProductCard> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: _selectedWeight == option
+                                    color: _selectedWeight.grams == option.grams
                                         ? const Color(0xFFC59B27)
                                         : const Color(0xFFFAF5EC),
                                     borderRadius: BorderRadius.circular(6),
                                     border: Border.all(
-                                      color: _selectedWeight == option
+                                      color: _selectedWeight.grams == option.grams
                                           ? const Color(0xFFC59B27)
                                           : const Color(0xFFE5DCC6),
                                     ),
@@ -207,7 +227,7 @@ class _ProductCardState extends ConsumerState<ProductCard> {
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
-                                      color: _selectedWeight == option
+                                      color: _selectedWeight.grams == option.grams
                                           ? Colors.white
                                           : const Color(0xFF4A3700),
                                     ),
